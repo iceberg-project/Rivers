@@ -1,0 +1,39 @@
+Using Kang's code to extract streams
+
+LakeExtraction_Multi
+1. Copy orthorectified imagery into ~\StreamExtraction\multiinput\
+	**MAKE SURE THE DATA ARE 8-BAND IMAGERY, NOT 4-BAND**
+2. Create "ndwi", "thinned_img", "thinned_shapefile", and "watermask" folders in ~\StreamExtraction\multioutput\
+3. Open the LakeExtraction.Program
+	-BandRatioTest: change input and output directory names, this will create the ndwi images
+		-input: D:\Analysis\Greenland_Analysis\GreenlandHighRes\StreamExtraction\multiinput\
+		-output: D:\Analysis\Greenland_Analysis\GreenlandHighRes\StreamExtraction\multioutput\ndwi\
+	-ExtractLargeStreams: Change two thresholds here and change the path name to (D:\Analysis\Greenland_Analysis\GreenlandHighRes\StreamExtraction\multioutput\watermask\) 
+		-globalThreshold: ~1.45f (or 1.25f)
+		-sizeThreshold: 500 
+	-ExtractLargeStreams_BatchProcess: change input directory name to the BandRatioTest output directory name (D:\Analysis\Greenland_Analysis\GreenlandHighRes\StreamExtraction\multioutput\ndwi\)
+		-This will call the ExtractLargeStreams function, and will create the watermask in the specified path directory in the ExtractLargeStreams function
+4. Run the LakeExtraction.Program
+5. Open the Thin_multi.py python script, and change the input and output directory names
+		-input: ~\StreamExtraction\multioutput\watermask
+		-image output: ~\StreamExtraction\multioutput\thinned_img
+		-shapefile output: ~\StreamExtraction\multioutput\thinned_shapefile
+	-Then run the program through Run>Run Module
+
+
+
+LAKES:
+-rerun the code with a higher global threshold (~1.55) and a much higher size threshold (~5000), then use Arc to convert to polygons
+
+
+
+
+LakeExtraction_Pan
+1. Copy orthorectified imagery into D:\Analysis\Greenland_Analysis\GreenlandHighRes\StreamExtraction\paninput\
+2. Resample pan image into 2m pixels (USING BILINEAR), output in .tif format and save in D:\Analysis\Greenland_Analysis\GreenlandHighRes\StreamExtraction\panoutput\resample\	
+3. Open the LakeExtraction.Program (PAN)
+	-ExtractLargeStreams: Change two thresholds here
+		-globalThreshold: ~110f
+		-sizeThreshold: 500 
+4. Cut the watermask imagery and paste into D:\Analysis\Greenland_Analysis\GreenlandHighRes\StreamExtraction\paninput\watermask\toprocess
+5. Open the Thin_multi.py python script, and change the input and output directory names.
