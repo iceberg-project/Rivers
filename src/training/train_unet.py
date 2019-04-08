@@ -1,3 +1,9 @@
+"""
+Author: Samira Daneshgar-Asl
+License: MIT
+Copyright: 2018-2019
+"""
+
 from unet_model import *
 from gen_patches import *
 

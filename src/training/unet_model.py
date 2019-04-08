@@ -1,3 +1,9 @@
+"""
+Author: Samira Daneshgar-Asl
+License: MIT
+Copyright: 2018-2019
+"""
+
 # u-net model with up-convolution or up-sampling and weighted binary-crossentropy as loss func
 
 from keras.models import Model

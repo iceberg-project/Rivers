@@ -1,3 +1,7 @@
+% Author: Samira Daneshgar-Asl
+% License: MIT
+% Copyright: 2018-2019
+
 % This program randomly selects 80% of the multi-page tiles for training and it makes the 'data' directory which will be used by 'training.py'
 % It renames and saves the training and test tiles of image in 'data\image_tiles_fortraining' and 'data\image_tiles_fortest', respectively.
 % It renames and saves the training and test tiles of the river mask in 'data\mask_tiles_fortraining' and 'data\mask_tiles_fortest', respectively.

@@ -1,3 +1,7 @@
+% Author: Samira Daneshgar-Asl
+% License: MIT
+% Copyright: 2018-2019
+
 clear all
 clc
 

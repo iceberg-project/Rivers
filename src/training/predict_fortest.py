@@ -1,3 +1,9 @@
+"""
+Author: Samira Daneshgar-Asl
+License: MIT
+Copyright: 2018-2019
+"""
+
 import math
 import numpy as np
 import tifffile as tiff
