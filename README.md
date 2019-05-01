@@ -1,6 +1,6 @@
 #Rivers (Arctic hydrology)
 
-Enbo's Repo (The codes are messy and need to be reconstructed. I will done this in the following week)
+Enbo's Repo
 
 1.Use src/tiling/RiverEx.py to prepare training data.
   This program is to randomly crop larges WorldView images and their corresponding labels into 512*512 small patches. The array image_sets represents names of the images and labels. The parameter filepath means the path for images and labels. For example, the filepath in this code is 'D:\\RiversTraining\\TwoClasses\\', then the location for images and labels are 'D:\\RiversTraining\\TwoClasses\\src\\' and 'D:\\RiversTraining\\TwoClasses\\label\\' respectively. The parameter image_sum governs the number of training data, in this case 12000. To run the program, the output folder structures should be created in advance. In this case, it should be 'D:\\RiversTraining\\TwoClasses\\training\\src' and 'D:\\RiversTraining\\TwoClasses\\training\\label' to store 512*512 small patches for training.
