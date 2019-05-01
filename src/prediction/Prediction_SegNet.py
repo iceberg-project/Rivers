@@ -8,26 +8,31 @@ from keras.models import load_model
 from sklearn.preprocessing import LabelEncoder
 from osgeo import gdal
 
+#image set used to test model
 TEST_SET = ['12JUL181553195.tif','12JUL181553219.tif','12JUL211543217.tif','12JUL211543228.tif','12JUL211543239.tif']
+
+#small patch size
 image_size = 512
+
+#local base directory for test data
 base_directory = 'D:\\RiversTraining\\TwoClasses\\'
 
+#label encoder to generate similar prediction images as training labels
 classes = [1,255] 
 labelencoder = LabelEncoder()  
-labelencoder.fit(classes) 
+labelencoder.fit(classes)
 
-#color_array = [[0,0,255],[255,0,0],[0,255,0]]
+# def args_parse():
+# # construct the argument parse and parse the arguments
+#     ap = argparse.ArgumentParser()
+#     ap.add_argument("-m", "--model", required=True,
+#         help="path to trained model model")
+#     ap.add_argument("-s", "--stride", required=False,
+#         help="crop slide stride", type=int, default=image_size)
+#     args = vars(ap.parse_args())
+#     return args
 
-def args_parse():
-# construct the argument parse and parse the arguments
-    ap = argparse.ArgumentParser()
-    ap.add_argument("-m", "--model", required=True,
-        help="path to trained model model")
-    ap.add_argument("-s", "--stride", required=False,
-        help="crop slide stride", type=int, default=image_size)
-    args = vars(ap.parse_args())    
-    return args
-
+#load images for prediction
 def load_img(path, grayscale=False):
     dataset = gdal.Open(path)       #打开文件
     im_width = dataset.RasterXSize    #栅格矩阵的列数
@@ -42,6 +47,7 @@ def load_img(path, grayscale=False):
         img = np.swapaxes(img,1,2)
     return im_geotrans,im_proj, img
 
+#write predictions into local disks.
 def write_img(filename,im_proj,im_geotrans,im_data):
         #判断栅格数据的数据类型
         if 'int8' in im_data.dtype.name:
@@ -74,15 +80,16 @@ def write_img(filename,im_proj,im_geotrans,im_data):
     
 def predict():
     # load the trained convolutional neural network
-    print("[INFO] loading network...")
     model = load_model(base_directory+'training\\img_zeb2.h5')
+    # stride for crop the original images
     stride = int(image_size/2)
     for n in range(len(TEST_SET)):
         path = TEST_SET[n]
         #load the image
         geotrans, proj, image = load_img(base_directory+'src\\' + path)
-        print(image.shape)
         h,w,bands = image.shape
+
+        #compute the image size after padding
         padding_h = ((h - image_size)//stride + 2) * stride + image_size 
         padding_w = ((w - image_size)//stride + 2) * stride + image_size 
         padding_img = np.zeros((padding_h,padding_w,bands),dtype=image.dtype)
@@ -91,44 +98,30 @@ def predict():
         padding_img[h+stride//2:padding_h,stride//2:w+stride//2,:] = image[h-(padding_h-h-stride//2):h,:,:]
         padding_img[:,0:stride//2,:] = padding_img[:,stride//2:stride,:]
         padding_img[:,w+stride//2:padding_w,:] = padding_img[:,w+stride//2-(padding_w-w-stride//2):w+stride//2,:]
-        
-        #padding_img = padding_img.astype("float")# / 255.0
         padding_img = img_to_array(padding_img)
-        print(padding_img.shape)
-        #mask_whole = np.zeros((padding_h,padding_w,3),dtype=np.uint8)
+
+        # create output numpy matrix for labels
         mask_whole = np.zeros((padding_h,padding_w),dtype=np.float64)
+
         for i in range((padding_h-image_size)//stride+1):
             for j in range((padding_w-image_size)//stride+1):
+                #crop the whole image to get 512*512 patches
                 crop = padding_img[i*stride:i*stride+image_size,j*stride:j*stride+image_size,:]
                 ch,cw,_ = crop.shape
                 crop = np.expand_dims(crop, axis=0)
+
+                #use the model to make prediction about the input small patches.
                 pred = model.predict(crop,verbose=2)
                 pred = np.argmax(pred, axis=3).flatten()
-                pred = labelencoder.inverse_transform(pred)#.reshape(image_size,image_size)
-                pred = pred.reshape((image_size,image_size))
-                #print(np.unique(pred))
-                #for ii in range(image_size-stride):
-                    #for jj in range(image_size-stride):  
-                        #if pred[stride//2+ii,stride//2+jj]==1:
-                        #    print(1)
-                        #mask_whole[stride//2+i*stride+ii,j*stride+stride//2+jj,:] = color_array[pred[stride//2+ii,stride//2+jj]]
-          
-                        
-                        
-                mask_whole[stride//2+i*stride:i*stride+image_size-stride//2,j*stride+stride//2:j*stride+image_size-stride//2] = pred[stride//2:image_size-stride//2,stride//2:image_size-stride//2]
-                
-        #for i in range(h):
-         #   for j in range(w):
-          #      mask_whole[i+stride//2,j+stride//2,:] = color_array[mask_whole[i+stride//2,j+stride//2,0]]
-        #print(mask_whole.shape)
-        #mask_whole = np.swapaxes(mask_whole,2,1)
-        #mask_whole = np.swapaxes(mask_whole,1,0)     
-        #print(mask_whole.shape)
-        write_img(base_directory+'prediction\\'+TEST_SET[n]+'_label_zeb_tune4.tif',proj,geotrans, mask_whole[stride//2:h+stride//2,stride//2:w+stride//2])
-        #cv2.imwrite(base_directory+'label\\'+TEST_SET[n]+'_label_zeb_tune1.tif',mask_whole[stride//2:h+stride//2,stride//2:w+stride//2,:])
-        
-    
 
-    
+                #decode the output class into label values
+                pred = labelencoder.inverse_transform(pred)
+                pred = pred.reshape((image_size,image_size))
+
+                #mosaic the small patch into the whole label image.
+                mask_whole[stride//2+i*stride:i*stride+image_size-stride//2,j*stride+stride//2:j*stride+image_size-stride//2] = pred[stride//2:image_size-stride//2,stride//2:image_size-stride//2]
+        #write the label for the whole image into  disk.
+        write_img(base_directory+'prediction\\'+TEST_SET[n]+'_label_zeb_tune4.tif',proj,geotrans, mask_whole[stride//2:h+stride//2,stride//2:w+stride//2])
+
 if __name__ == '__main__':
     predict()

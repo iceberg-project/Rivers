@@ -22,24 +22,24 @@ from osgeo import gdal
 
 from keras import backend as K
 import tensorflow as tf
-'''
-Compatible with tensorflow backend
-'''
 
-from tensorflow.python.client import device_lib
-print(device_lib.list_local_devices())
+#SegNet
 
-#River_net
-
-img_w = 512 
+#image width
+img_w = 512
+#image height
 img_h = 512
+#band counts
 bands = 8
-n_label = 2  
-  
-classes = [1,255] 
-labelencoder = LabelEncoder()  
-labelencoder.fit(classes)  
-        
+#classes number
+n_label = 2
+
+#label encoder converting labels into one hot encoding
+classes = [1,255]
+labelencoder = LabelEncoder()
+labelencoder.fit(classes)
+
+#load local training images and labels
 def load_img(path, grayscale=False):
     dataset = gdal.Open(path)       #打开文件
     im_width = dataset.RasterXSize    #栅格矩阵的列数
@@ -52,96 +52,99 @@ def load_img(path, grayscale=False):
         img = np.swapaxes(img,1,2)
     return img
 
-def SegNet():  
-    model = Sequential()  
-    #encoder  
+#define SegNet Structure
+def SegNet():
+    model = Sequential()
+    #encoder
     model.add(Conv2D(64,(3,3),strides=(1,1),input_shape=(img_w,img_h, 3),padding='same',activation='relu', data_format = 'channels_last', kernel_regularizer=regularizers.l2(0.01)))
-    model.add(BatchNormalization())  
-    model.add(Conv2D(64,(3,3),strides=(1,1),padding='same',activation='relu', kernel_regularizer=regularizers.l2(0.01)))  
-    model.add(BatchNormalization())  
-    model.add(MaxPooling2D(pool_size=(2,2)))  
-    #(128,128)  
-    model.add(Conv2D(128, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))  
-    model.add(BatchNormalization())  
-    model.add(Conv2D(128, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))  
-    model.add(BatchNormalization())  
-    model.add(MaxPooling2D(pool_size=(2, 2)))  
-    #(64,64)  
-    model.add(Conv2D(256, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))  
-    model.add(BatchNormalization())  
-    model.add(Conv2D(256, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))  
-    model.add(BatchNormalization())  
-    model.add(Conv2D(256, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))  
-    model.add(BatchNormalization())  
-    model.add(MaxPooling2D(pool_size=(2, 2)))  
-    #(32,32)  
-    model.add(Conv2D(512, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))  
-    model.add(BatchNormalization())  
-    model.add(Conv2D(512, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))  
-    model.add(BatchNormalization())  
-    model.add(Conv2D(512, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))  
-    model.add(BatchNormalization())  
-    model.add(MaxPooling2D(pool_size=(2, 2)))  
-    #(16,16)  
-    model.add(Conv2D(512, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))  
-    model.add(BatchNormalization())  
-    model.add(Conv2D(512, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))  
-    model.add(BatchNormalization())  
-    model.add(Conv2D(512, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))  
-    model.add(BatchNormalization())  
-    model.add(MaxPooling2D(pool_size=(2, 2)))  
-    #(8,8)  
-    #decoder  
-    model.add(UpSampling2D(size=(2,2)))  
-    #(16,16)  
-    model.add(Conv2D(512, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))  
-    model.add(BatchNormalization())  
-    model.add(Conv2D(512, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))  
-    model.add(BatchNormalization())  
-    model.add(Conv2D(512, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))  
-    model.add(BatchNormalization())  
-    model.add(UpSampling2D(size=(2, 2)))  
-    #(32,32)  
-    model.add(Conv2D(512, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))  
-    model.add(BatchNormalization())  
-    model.add(Conv2D(512, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))  
-    model.add(BatchNormalization())  
-    model.add(Conv2D(512, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))  
-    model.add(BatchNormalization())  
-    model.add(UpSampling2D(size=(2, 2)))  
-    #(64,64)  
-    model.add(Conv2D(256, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))  
-    model.add(BatchNormalization())  
-    model.add(Conv2D(256, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))  
-    model.add(BatchNormalization())  
-    model.add(Conv2D(256, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))  
-    model.add(BatchNormalization())  
-    model.add(UpSampling2D(size=(2, 2)))  
-    #(128,128)  
-    model.add(Conv2D(128, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))  
-    model.add(BatchNormalization())  
-    model.add(Conv2D(128, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))  
-    model.add(BatchNormalization())  
-    model.add(UpSampling2D(size=(2, 2)))  
-    #(256,256)  
-    model.add(Conv2D(64, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))  
-    model.add(BatchNormalization())  
+    model.add(BatchNormalization())
+    model.add(Conv2D(64,(3,3),strides=(1,1),padding='same',activation='relu', kernel_regularizer=regularizers.l2(0.01)))
+    model.add(BatchNormalization())
+    model.add(MaxPooling2D(pool_size=(2,2)))
+    #(128,128)
+    model.add(Conv2D(128, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))
+    model.add(BatchNormalization())
+    model.add(Conv2D(128, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))
+    model.add(BatchNormalization())
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    #(64,64)
+    model.add(Conv2D(256, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))
+    model.add(BatchNormalization())
+    model.add(Conv2D(256, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))
+    model.add(BatchNormalization())
+    model.add(Conv2D(256, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))
+    model.add(BatchNormalization())
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    #(32,32)
+    model.add(Conv2D(512, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))
+    model.add(BatchNormalization())
+    model.add(Conv2D(512, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))
+    model.add(BatchNormalization())
+    model.add(Conv2D(512, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))
+    model.add(BatchNormalization())
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    #(16,16)
+    model.add(Conv2D(512, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))
+    model.add(BatchNormalization())
+    model.add(Conv2D(512, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))
+    model.add(BatchNormalization())
+    model.add(Conv2D(512, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))
+    model.add(BatchNormalization())
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    #(8,8)
+    #decoder
+    model.add(UpSampling2D(size=(2,2)))
+    #(16,16)
+    model.add(Conv2D(512, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))
+    model.add(BatchNormalization())
+    model.add(Conv2D(512, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))
+    model.add(BatchNormalization())
+    model.add(Conv2D(512, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))
+    model.add(BatchNormalization())
+    model.add(UpSampling2D(size=(2, 2)))
+    #(32,32)
+    model.add(Conv2D(512, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))
+    model.add(BatchNormalization())
+    model.add(Conv2D(512, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))
+    model.add(BatchNormalization())
+    model.add(Conv2D(512, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))
+    model.add(BatchNormalization())
+    model.add(UpSampling2D(size=(2, 2)))
+    #(64,64)
+    model.add(Conv2D(256, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))
+    model.add(BatchNormalization())
+    model.add(Conv2D(256, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))
+    model.add(BatchNormalization())
+    model.add(Conv2D(256, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))
+    model.add(BatchNormalization())
+    model.add(UpSampling2D(size=(2, 2)))
+    #(128,128)
+    model.add(Conv2D(128, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))
+    model.add(BatchNormalization())
+    model.add(Conv2D(128, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))
+    model.add(BatchNormalization())
+    model.add(UpSampling2D(size=(2, 2)))
+    #(256,256)
+    model.add(Conv2D(64, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))
+    model.add(BatchNormalization())
     model.add(Dropout(0.5))
-    model.add(Conv2D(64, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))  
-    model.add(BatchNormalization())  
-    model.add(Conv2D(n_label, (1, 1), strides=(1, 1), padding='same', activation='softmax'))  
-    #model.add(Reshape((n_label,img_w*img_h)))  
-    #axis=1和axis=2互换位置，等同于np.swapaxes(layer,1,2)  
-    #model.add(Permute((2,1)))  
-    #model.add(Activation('softmax'))  
-    model.compile(loss='categorical_crossentropy',optimizer='sgd',metrics=['accuracy'])  
-    model.summary()  
+    model.add(Conv2D(64, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))
+    model.add(BatchNormalization())
+    model.add(Conv2D(n_label, (1, 1), strides=(1, 1), padding='same', activation='softmax'))
+    #model.add(Reshape((n_label,img_w*img_h)))
+    #axis=1和axis=2互换位置，等同于np.swapaxes(layer,1,2)
+    #model.add(Permute((2,1)))
+    #model.add(Activation('softmax'))
+    model.compile(loss='categorical_crossentropy',optimizer='sgd',metrics=['accuracy'])
+    model.summary()
     return model
 
+#training data base folder
 filepath ='D:\\RiversTraining\\TwoClasses\\training\\'
 
+#randomly select 25% of data as validation set
 def get_train_val(val_rate = 0.25):
-    train_url = []    
+    train_url = []
     train_set = []
     val_set  = []
     for pic in os.listdir(filepath + 'src'):
@@ -151,68 +154,69 @@ def get_train_val(val_rate = 0.25):
     val_num = int(val_rate * total_num)
     for i in range(len(train_url)):
         if i < val_num:
-            val_set.append(train_url[i]) 
+            val_set.append(train_url[i])
         else:
             train_set.append(train_url[i])
     return train_set,val_set
 
-# data for training  
-def generateData(batch_size,data=[]):  
+# read the data and prepare them for training
+def generateData(batch_size,data=[]):
     #print 'generateData...'
-    while True:  
-        train_data = []  
-        train_label = []  
-        batch = 0  
-        for i in (range(len(data))): 
+    while True:
+        train_data = []
+        train_label = []
+        batch = 0
+        for i in (range(len(data))):
             url = data[i]
-            batch += 1 
+            batch += 1
             img = load_img(filepath + 'src\\' + url)
-            img = img_to_array(img) 
-            train_data.append(img)  
-            label = load_img(filepath + 'label\\' + url, grayscale=True)            
+            img = img_to_array(img)
+            train_data.append(img)
+            label = load_img(filepath + 'label\\' + url, grayscale=True)
             label = img_to_array(label).reshape((img_w * img_h,))
             train_label.append(label)
-            if batch % batch_size==0: 
-                train_data = np.array(train_data)  
-                train_label = np.array(train_label).flatten()                
-                train_label = labelencoder.transform(train_label)                
-                train_label = to_categorical(train_label, num_classes=n_label)  
-                train_label = train_label.reshape((batch_size,img_w, img_h,n_label)) 
+            if batch % batch_size==0:
+                train_data = np.array(train_data)
+                train_label = np.array(train_label).flatten()
+                train_label = labelencoder.transform(train_label)
+                train_label = to_categorical(train_label, num_classes=n_label)
+                train_label = train_label.reshape((batch_size,img_w, img_h,n_label))
                 yield (train_data,train_label)
-                train_data = []  
-                train_label = []  
-                batch = 0  
- 
-# data for validation 
-def generateValidData(batch_size,data=[]):  
+                train_data = []
+                train_label = []
+                batch = 0
+
+# read the data and prepare them data for validation
+def generateValidData(batch_size,data=[]):
     #print 'generateValidData...'
-    while True:  
-        valid_data = []  
-        valid_label = []  
-        batch = 0  
-        for i in (range(len(data))):  
+    while True:
+        valid_data = []
+        valid_label = []
+        batch = 0
+        for i in (range(len(data))):
             url = data[i]
-            batch += 1  
+            batch += 1
             img = load_img(filepath + 'src\\' + url)
-            img = img_to_array(img)  
-            valid_data.append(img)  
+            img = img_to_array(img)
+            valid_data.append(img)
             label = load_img(filepath + 'label\\' + url, grayscale=True)
-            label = img_to_array(label).reshape((img_w * img_h,))  
-            valid_label.append(label)  
-            if batch % batch_size==0:  
-                valid_data = np.array(valid_data)  
-                valid_label = np.array(valid_label).flatten()  
-                valid_label = labelencoder.transform(valid_label)  
-                valid_label = to_categorical(valid_label, num_classes=n_label)  
+            label = img_to_array(label).reshape((img_w * img_h,))
+            valid_label.append(label)
+            if batch % batch_size==0:
+                valid_data = np.array(valid_data)
+                valid_label = np.array(valid_label).flatten()
+                valid_label = labelencoder.transform(valid_label)
+                valid_label = to_categorical(valid_label, num_classes=n_label)
                 valid_label = valid_label.reshape((batch_size,img_w, img_h,n_label))
-                yield (valid_data,valid_label)  
-                valid_data = []  
-                valid_label = []  
-                batch = 0  
-  
-def train(): 
-    EPOCHS = 20
-    BS = 3
+                yield (valid_data,valid_label)
+                valid_data = []
+                valid_label = []
+                batch = 0
+
+#training process
+def train():
+    EPOCHS = 20  #training process
+    BS = 3    #batch size
     model = SegNet()
     modelcheck = ModelCheckpoint(filepath + 'img_zeb_tune_4.h5',monitor='val_acc',save_best_only=True,mode='max')  
     callable = [modelcheck]  
