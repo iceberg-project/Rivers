@@ -80,7 +80,7 @@ def write_img(filename,im_proj,im_geotrans,im_data):
     
 def predict():
     # load the trained convolutional neural network
-    model = load_model(base_directory+'training\\img_zeb2.h5')
+    model = load_model(base_directory+'training\\SegNet.h5')
     # stride for crop the original images
     stride = int(image_size/2)
     for n in range(len(TEST_SET)):
