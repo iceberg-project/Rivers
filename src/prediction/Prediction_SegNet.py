@@ -34,22 +34,22 @@ labelencoder.fit(classes)
 
 #load images for prediction
 def load_img(path, grayscale=False):
-    dataset = gdal.Open(path)       #打开文件
-    im_width = dataset.RasterXSize    #栅格矩阵的列数
-    im_height = dataset.RasterYSize   #栅格矩阵的行数
-    im_geotrans = dataset.GetGeoTransform()  #仿射矩阵
-    im_proj = dataset.GetProjection() #地图投影信息
-    im_data = dataset.ReadAsArray(0,0,im_width,im_height) #将数据写成数组，对应栅格矩阵
-    del dataset #关闭对象，文件dataset
-    img = np.array(im_data,dtype=im_data.dtype)   # band first
-    if grayscale==False:
+    dataset = gdal.Open(path)       #open the file
+    im_width = dataset.RasterXSize    #the number of column for the image
+    im_height = dataset.RasterYSize   #the number of row for the image
+    im_geotrans = dataset.GetGeoTransform()  #Affine Matrix
+    im_proj = dataset.GetProjection() #Projection information for the image
+    im_data = dataset.ReadAsArray(0,0,im_width,im_height) #convert image into array, which corresponds to image matrix.
+    del dataset #close dataset object
+    img = np.array(im_data,dtype=im_data.dtype) 
+    if grayscale==False: #if not grayscale image, change the order of the axis
         img = np.swapaxes(img,0,1)
         img = np.swapaxes(img,1,2)
     return im_geotrans,im_proj, img
 
 #write predictions into local disks.
 def write_img(filename,im_proj,im_geotrans,im_data):
-        #判断栅格数据的数据类型
+        #decide which the datatype of the image is 
         if 'int8' in im_data.dtype.name:
             datatype = gdal.GDT_Byte
         elif 'int16' in im_data.dtype.name:
@@ -58,21 +58,21 @@ def write_img(filename,im_proj,im_geotrans,im_data):
             datatype = gdal.GDT_Float32
  
         print(im_data.shape)
-        #判读数组维数
+        #decide the dimension of the image (worldview image or label image)
         if len(im_data.shape) == 3:
             im_bands, im_height, im_width = im_data.shape
         else:
             im_bands, (im_height, im_width) = 1,im_data.shape
  
         #创建文件
-        driver = gdal.GetDriverByName("GTiff")   #数据类型必须有，因为要计算需要多大内存空间
+        driver = gdal.GetDriverByName("GTiff")   #create a geotiff driver
         print(filename, im_width, im_height, im_bands, datatype)
         dataset = driver.Create(filename, im_width, im_height, im_bands, datatype)
-        dataset.SetGeoTransform(im_geotrans)              #写入仿射变换参数
-        dataset.SetProjection(im_proj)                    #写入投影
+        dataset.SetGeoTransform(im_geotrans)              #Set affine transformation parameters
+        dataset.SetProjection(im_proj)                    #set projection information
  
         if im_bands == 1:
-            dataset.GetRasterBand(1).WriteArray(im_data)  #写入数组数据
+            dataset.GetRasterBand(1).WriteArray(im_data)  #write ths image data
         else:
             for i in range(im_bands):
                 dataset.GetRasterBand(i+1).WriteArray(im_data[i])
