@@ -41,12 +41,12 @@ labelencoder.fit(classes)
 
 #load local training images and labels
 def load_img(path, grayscale=False):
-    dataset = gdal.Open(path)       #打开文件
-    im_width = dataset.RasterXSize    #栅格矩阵的列数
-    im_height = dataset.RasterYSize   #栅格矩阵的行数
-    im_data = dataset.ReadAsArray(0,0,im_width,im_height) #将数据写成数组，对应栅格矩阵
-    del dataset #关闭对象，文件dataset
-    img = np.array(im_data,dtype = im_data.dtype)   # band first
+    dataset = gdal.Open(path)       #open the file
+    im_width = dataset.RasterXSize    #the number of column
+    im_height = dataset.RasterYSize   #the number of row
+    im_data = dataset.ReadAsArray(0,0,im_width,im_height) #transform the image into array
+    del dataset #close dataset object
+    img = np.array(im_data,dtype = im_data.dtype) 
     if grayscale==False:
         img = np.swapaxes(img,0,1)
         img = np.swapaxes(img,1,2)
@@ -130,11 +130,7 @@ def SegNet():
     model.add(Dropout(0.5))
     model.add(Conv2D(64, (3, 3), strides=(1, 1), padding='same', activation='relu', kernel_regularizer=regularizers.l2(0.01)))
     model.add(BatchNormalization())
-    model.add(Conv2D(n_label, (1, 1), strides=(1, 1), padding='same', activation='softmax'))
-    #model.add(Reshape((n_label,img_w*img_h)))
-    #axis=1和axis=2互换位置，等同于np.swapaxes(layer,1,2)
-    #model.add(Permute((2,1)))
-    #model.add(Activation('softmax'))
+    model.add(Conv2D(n_label, (1, 1), strides=(1, 1), padding='same', activation='softmax')
     model.compile(loss='categorical_crossentropy',optimizer='sgd',metrics=['accuracy'])
     model.summary()
     return model
