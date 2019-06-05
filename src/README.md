@@ -2,7 +2,7 @@
 
 This repo is an implementation of U-Net for river extraction and depends on the following libraries:
 
-- Keras \&gt;= 1.0
+- Keras >= 1.0
 - Numpy
 - Tifffile
 
