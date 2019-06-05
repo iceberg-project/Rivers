@@ -63,7 +63,7 @@ def picture_from_mask(mask, threshold=0):
     for i in range(1, 3):
         cl = z_order[i]
         for ch in range(3):
-            pict[ch,:,:][mask[cl,:,:] > threshold] = colors[cl][ch]
+            pict[ch, :, :][mask[cl, :, :] > threshold] = colors[cl][ch]
     return pict
 
 def main():    
@@ -75,12 +75,12 @@ def main():
         if image_path.endswith('.tif'):           
             # create the full input path and read the file
             input_path = os.path.join(path, image_path)
-            img= normalize(tiff.imread((input_path)).transpose([1,2,0]))
+            img= normalize(tiff.imread((input_path)).transpose([1, 2, 0]))
             # predict the image
-            mask = predict(img, model, patch_sz=PATCH_SZ, n_classes=N_CLASSES).transpose([2,0,1])  # make channels first
+            mask = predict(img, model, patch_sz=PATCH_SZ, n_classes=N_CLASSES).transpose([2, 0, 1])  # make channels first
             map = picture_from_mask(mask, 0.5)
-            fullpath = os.path.join(outPath,"Predicted-Mask-"+image_path)
-            tiff.imsave(fullpath, map[0,:,:])
+            fullpath = os.path.join(outPath, "Predicted-Mask-" + image_path)
+            tiff.imsave(fullpath, map[0, :, :])
                 
 if __name__ == '__main__':
     model = get_model()

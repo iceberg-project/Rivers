@@ -14,18 +14,18 @@ from train_unet import weights_path, get_model, normalize, PATCH_SZ, N_CLASSES
 if not os.path.exists('data/WV_predicted'):
         os.makedirs('data/WV_predicted')
 
-image= normalize(tiff.imread('name of the WV image.tif').transpose([1,2,0]))
-wind_row, wind_col = 800,800 # dimensions of the image
+image = normalize(tiff.imread('name of the WV image.tif').transpose([1, 2, 0]))
+wind_row, wind_col = 800, 800 # dimensions of the image
 windowSize = 800 
-stepSize=400
+stepSize = 400
 
 
-desired_size_row=stepSize*math.ceil(image.shape[0]/stepSize)
-desired_size_col=stepSize*math.ceil(image.shape[1]/stepSize)
+desired_size_row = stepSize*math.ceil(image.shape[0]/stepSize)
+desired_size_col = stepSize*math.ceil(image.shape[1]/stepSize)
 
-img = np.zeros((desired_size_row,desired_size_col,image.shape[2]), dtype=image.dtype)
+img = np.zeros((desired_size_row, desired_size_col, image.shape[2]), dtype=image.dtype)
 
-img[:image.shape[0],:image.shape[1]] = image
+img[:image.shape[0], :image.shape[1]] = image
 
 
 def predict(x, model, patch_sz=160, n_classes=2):
@@ -69,19 +69,19 @@ def predict(x, model, patch_sz=160, n_classes=2):
 def sliding_window(img, stepSize, windowSize):
     for y in range(0, img.shape[0], stepSize):
         for x in range(0, img.shape[1], stepSize):
-            yield (x, y, img[y:y + windowSize, x:x + windowSize,:])
+            yield (x, y, img[y:y + windowSize, x:x + windowSize, :])
                         
 def main():
     outPath = 'data/WV_predicted'
     i=0
-    for(x,y, window) in sliding_window(img, stepSize, windowSize):
+    for(x, y, window) in sliding_window(img, stepSize, windowSize):
         if window.shape[0] != wind_row or window.shape[1] != wind_col:
             continue
-        t_img = img[y:y+wind_row,x:x+wind_col,:]# the image which has to be predicted
-        mask = predict(t_img, model, patch_sz=PATCH_SZ, n_classes=N_CLASSES).transpose([2,0,1]) 
+        t_img = img[y:y+wind_row, x:x+wind_col, :]# the image which has to be predicted
+        mask = predict(t_img, model, patch_sz=PATCH_SZ, n_classes=N_CLASSES).transpose([2, 0, 1]) 
         cnt=str(i)
         imagename="image-"+cnt+".tif"
-        fullpath = os.path.join(outPath,imagename)
+        fullpath = os.path.join(outPath, imagename)
         tiff.imsave(fullpath, mask)
         i=i+1
         

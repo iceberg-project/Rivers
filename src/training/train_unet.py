@@ -25,7 +25,7 @@ def normalize(img):
 
 N_BANDS = 8
 N_CLASSES = 2  # river and non-river
-CLASS_WEIGHTS = [0.1,0.9]
+CLASS_WEIGHTS = [0.1, 0.9]
 N_EPOCHS = 150
 UPCONV = True
 PATCH_SZ = 160   # should divide by 16
