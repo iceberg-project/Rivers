@@ -4,6 +4,12 @@
 
 function tiling_pretraining(FileName1, FileName2)
     
+    if ~isstring(FileName1)
+        error('Error. FileName1 must be a string.')
+    end
+    if ~isstring(FileName2)
+        error('Error. FileName2 must be a string.')
+    end
     tmp_filename = split(FileName1,"/");
     PathName1 = join(tmp_filename(1:end-1),"/");
     FileName1 = tmp_filename(end);
