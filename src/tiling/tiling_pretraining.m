@@ -1,3 +1,7 @@
+% Author: Samira Daneshgar-Asl
+% License: MIT
+% Copyright: 2018-2019
+
 % This program prepares the data for training purpose.
 % It tiles an 8-bit 3-band WV image and its corresponding 8-bit river mask to windows of 800 by 800 with steps of 400,
 % and saves the multi-page format of the generated tils in the 'tiled multi-page image' and 'tiled multi-page river mask' folders.
