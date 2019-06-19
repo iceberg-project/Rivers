@@ -43,7 +43,7 @@ if not os.path.exists(weights_path):
     os.makedirs(weights_path)
 weights_path += '/unet_weights.hdf5'
 
-trainIds = [str(i).zfill(2) for i in range(1, 206)]  # should be equal to the number of training tiles plus 1
+trainIds = [str(i).zfill(2) for i in range(1, 168)]  # should be equal to the number of training tiles plus 1
 
 
 if __name__ == '__main__':
