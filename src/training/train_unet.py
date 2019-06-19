@@ -30,7 +30,7 @@ N_EPOCHS = 150
 UPCONV = True
 PATCH_SZ = 160   
 BATCH_SIZE = 150
-TRAIN_SZ = 6000  # train size
+TRAIN_SZ = 4000  # train size
 VAL_SZ = 1000    # validation size
 
 
@@ -43,7 +43,7 @@ if not os.path.exists(weights_path):
     os.makedirs(weights_path)
 weights_path += '/unet_weights.hdf5'
 
-trainIds = [str(i).zfill(2) for i in range(1, 321)]  # should be equal to the number of training tiles plus 1
+trainIds = [str(i).zfill(2) for i in range(1, 206)]  # should be equal to the number of training tiles plus 1
 
 
 if __name__ == '__main__':
