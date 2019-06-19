@@ -1,11 +1,11 @@
 % This program prepares the data for training purpose.
-% It tiles a 16-bit 8-band WV image and its corresponding 8-bit river mask to windows of 800 by 800 with steps of 100,
+% It tiles an 8-bit 3-band WV image and its corresponding 8-bit river mask to windows of 800 by 800 with steps of 400,
 % and saves the multi-page format of the generated tils in the 'tiled multi-page image' and 'tiled multi-page river mask' folders.
 
 clear all
 clc
 
-[FileName1, PathName1] = uigetfile('*.tif', 'Select a 16-bit 8-band WV image for training:');
+[FileName1, PathName1] = uigetfile('*.tif', 'Select an 8-bit 3-band WV image for training:');
 image = imread(fullfile(PathName1, FileName1));
 
 [FileName2, PathName2] = uigetfile('*.tif', 'Select the corresponding 8-bit river mask:');
@@ -27,7 +27,7 @@ patch_size=800;
 a=1:patch_size:size(image, 1);
 b=1:patch_size:size(image, 2);
 
-step=100;
+step=400;
 
 k=1;
 for row = 1:step:a(1,end-1)
