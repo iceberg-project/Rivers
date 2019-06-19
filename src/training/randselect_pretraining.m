@@ -38,8 +38,8 @@ end
 
 FileList2 = dir(fullfile('tiling\tiled multi-page image', '*.tif'));
 for k = 1:numel(FileList2)
-    movefile(['tiling\tiled multi-page image\' FileList2(k).name],[WriteDir2 'Image-Test-' FileList2(k).name]);
-    movefile(['tiling\tiled multi-page river mask\' FileList2(k).name], [WriteDir4 'Mask-Test-' FileList2(k).name]);
+    movefile(['tiling\tiled multi-page image\' FileList2(k).name],[WriteDir2 'Test-' FileList2(k).name]);
+    movefile(['tiling\tiled multi-page river mask\' FileList2(k).name], [WriteDir4 'Test-' FileList2(k).name]);
 end
 
 rmdir('tiling\tiled multi-page image','s')
