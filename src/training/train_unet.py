@@ -23,12 +23,12 @@ def normalize(img):
 
 
 
-N_BANDS = 8
+N_BANDS = 3
 N_CLASSES = 2  # river and non-river
 CLASS_WEIGHTS = [0.1, 0.9]
 N_EPOCHS = 150
 UPCONV = True
-PATCH_SZ = 160   # should divide by 16
+PATCH_SZ = 160   
 BATCH_SIZE = 150
 TRAIN_SZ = 6000  # train size
 VAL_SZ = 1000    # validation size
@@ -43,7 +43,7 @@ if not os.path.exists(weights_path):
     os.makedirs(weights_path)
 weights_path += '/unet_weights.hdf5'
 
-trainIds = [str(i).zfill(2) for i in range(1, 168)]  
+trainIds = [str(i).zfill(2) for i in range(1, 321)]  # should be equal to the number of training tiles plus 1
 
 
 if __name__ == '__main__':
