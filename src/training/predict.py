@@ -14,7 +14,7 @@ from train_unet import weights_path, get_model, normalize, PATCH_SZ, N_CLASSES
 if not os.path.exists('data/WV_predicted'):
         os.makedirs('data/WV_predicted')
 
-image = normalize(tiff.imread('8bit-3bands Multi-Page Images/name of the WV image.tif').transpose([1, 2, 0]))
+image = normalize(tiff.imread('8bit-3bands Multi-Page Images/name of the multi-page WV image.tif').transpose([1, 2, 0]))
 wind_row, wind_col = 800,800 # dimensions of the image
 windowSize = 800 
 stepSize=400
