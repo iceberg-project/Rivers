@@ -5,7 +5,7 @@
 clear all
 clc
 
-[FileName, PathName] = uigetfile('*.tif', 'Select a 16 bit image file with 8 bands:');
+[FileName, PathName] = uigetfile('*.tif', 'Select the 8 bit image file with 3 bands:');
 File = fullfile(PathName, FileName);
 [I, R] = geotiffread(File);
 img=I;
