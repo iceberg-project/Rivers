@@ -26,7 +26,16 @@ col = 1:patch_size/2:b(1,end-1);
 A=zeros(a(1,end)+(patch_size/2)-1,b(1,end)+(patch_size/2)-1,'single');
 B=zeros(a(1,end)+(patch_size/2)-1,b(1,end)+(patch_size/2)-1,'single');
 
-files = dir(fullfile('data\WV_predicted', '*.tif'));
+if isunix
+    path = 'data/WV_predict';
+elseif ispc
+    path = 'data\WV_predicted';
+else
+    path = ''
+    disp 'Something went wrong';
+end
+
+files = dir(fullfile(path, '*.tif'));
 files_ordered = natsortfiles({files.name});
 totalFiles = numel(files);
 
