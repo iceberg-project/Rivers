@@ -27,7 +27,7 @@ A=zeros(a(1,end)+(patch_size/2)-1,b(1,end)+(patch_size/2)-1,'single');
 B=zeros(a(1,end)+(patch_size/2)-1,b(1,end)+(patch_size/2)-1,'single');
 
 if isunix
-    path = 'data/WV_predict';
+    path = 'data/WV_predicted';
 elseif ispc
     path = 'data\WV_predicted';
 else
