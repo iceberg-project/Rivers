@@ -29,13 +29,8 @@ def generate_discover_pipeline(path):
     # Create Task 1, training
     task = Task()
     task.name = 'Disc-T0'
-    task.pre_exec = ['module load psc_path/1.1',
-                     'module load slurm/default',
-                     'module load intel/17.4',
-                     'module load python3',
-                     'source $SCRATCH/pytorchCuda/bin/activate',
-                     'export PYTHONPATH=$SCRATCH/pytorchCuda/lib/' +\
-                     'python3.5/site-packages:$PYTHONPATH']
+    task.pre_exec = ['module load anaconda3/2019.03',
+                     'source activate keras-gpu']
     task.executable = 'python3'   # Assign executable to the task
     task.arguments = ['image_disc.py', '%s' % path, '--filename=images.csv',
                       '--filesize']
@@ -50,7 +45,7 @@ def generate_discover_pipeline(path):
     return pipeline
 
 
-def generate_pipeline(name, image, model_name, device):
+def generate_pipeline(name, image, image_size, model_name, device):
 
     '''
     This function creates a pipeline for an image that will be analyzed.
@@ -59,11 +54,7 @@ def generate_pipeline(name, image, model_name, device):
         :name: Pipeline name, str
         :image: image path, str
         :image_size: image size in MBs, int
-        :tile_size: The size of each tile, int
-        :model_path: Path to the model file, str
-        :model_arch: Prediction Model Architecture, str
         :model_name: Prediction Model Name, str
-        :hyperparam_set: Which hyperparameter set to use, str
         :device: Which GPU device will be used by this pipeline, int
     '''
     # Create a Pipeline object
@@ -75,23 +66,16 @@ def generate_pipeline(name, image, model_name, device):
     # Create Task 1, training
     task0 = Task()
     task0.name = '%s-T0' % stage0.name
-    task0.pre_exec = ['module load psc_path/1.1',
-                      'module load slurm/default',
-                      'module load intel/17.4',
-                      'module load python3',
-                      'source $SCRATCH/pytorchCuda/bin/activate',
-                      'export PYTHONPATH=$SCRATCH/pytorchCuda/lib/' +\
-                      'python3.5/site-packages:$PYTHONPATH']
-    task0.executable = 'python3'   # Assign executable to the task
+    task0.pre_exec = ['module load matlab']
+    task0.executable = 'matlab'   # Assign executable to the task
     # Assign arguments for the task executable
-    task0.arguments = ['tile_raster.py', '--scale_bands=%s' % scale_bands,
-                       '--input_image=%s' % image.split('/')[-1],
-                       # This line points to the local filesystem of the node
-                       # that the tiling of the image happened.
-                       '--output_folder=$NODE_LFS_PATH/%s' % task0.name]
+    task0.arguments = ['-nodisplay', '-nosplash', '-r',
+                       'multipagetiff("%s","$NODE_LFS_PATH/%s")' % (image,
+                                                               task0.name)]
     task0.link_input_data = [image]
-    task0.upload_input_data = [os.path.abspath('../tiling/tile_raster.py')]
-    task0.cpu_reqs = {'processes': 1, 'threads_per_process': 10,
+    task0.upload_input_data = [os.path.abspath('../utils/multipagetiff.m'),
+                               os.path.abspath('../utils/saveastiff.m')]
+    task0.cpu_reqs = {'processes': 1, 'threads_per_process': 1,
                       'thread_type': 'OpenMP'}
     task0.lfs_per_process = image_size
 
@@ -99,71 +83,54 @@ def generate_pipeline(name, image, model_name, device):
     # Add Stage to the Pipeline
     entk_pipeline.add_stages(stage0)
 
-    # Create a Stage object
-    stage1 = Stage()
-    stage1.name = '%s-S1' % (name)
-    # Create Task 1, training
-    task1 = Task()
-    task1.name = '%s-T1' % stage1.name
-    task1.pre_exec = ['module load psc_path/1.1',
-                      'module load slurm/default',
-                      'module load intel/17.4',
-                      'module load python3',
-                      'module load cuda',
-                      'source $SCRATCH/pytorchCuda/bin/activate',
-                      'export PYTHONPATH=$SCRATCH/pytorchCuda/lib/' +\
-                      'python3.5/site-packages:$PYTHONPATH',
-                      'export CUDA_VISIBLE_DEVICES=%d' % device]
-    task1.executable = 'python3'   # Assign executable to the task
-
-    # Assign arguments for the task executable
-    task1.arguments = ['predict_raster.py',
-                       '--input_image', image.split('/')[-1],
-                       '--model_architecture', model_arch,
-                       '--hyperparameter_set', hyperparam_set,
-                       '--training_set', training_set,
-                       '--test_folder', '$NODE_LFS_PATH/%s' % task0.name,
-                       '--model_path', './',
-                       '--output_folder', './%s' % image.split('/')[-1].
-                                                         split('.')[0]]
-    task1.link_input_data = ['$SHARED/%s.tar' % model_name]
-    task1.upload_input_data = [os.path.abspath('../predicting/' +
-                                               'predict_raster.py'),
-                               os.path.abspath('../predicting/' +
-                                               'predict_sealnet.py'),
-                               os.path.abspath('../utils/')]
-    task1.cpu_reqs = {'processes': 1, 'threads_per_process': 1,
-                      'thread_type': 'OpenMP'}
-    task1.gpu_reqs = {'processes': 1, 'threads_per_process': 1,
-                      'thread_type': 'OpenMP'}
-    # Download resuting images
-    task1.download_output_data = ['%s/ > %s' % (image.split('/')[-1].
-                                                      split('.')[0],
-                                                image.split('/')[-1])]
-    task1.tag = task0.name
-
-    stage1.add_tasks(task1)
-    # Add Stage to the Pipeline
-    entk_pipeline.add_stages(stage1)
+    ## Create a Stage object
+    #stage1 = Stage()
+    #stage1.name = '%s-S1' % (name)
+    ## Create Task 1, training
+    #task1 = Task()
+    #task1.name = '%s-T1' % stage1.name
+    #task1.pre_exec = ['module load psc_path/1.1',
+    #                  'module load slurm/default',
+    #                  'module load intel/17.4',
+    #                  'module load python3',
+    #                  'module load cuda',
+    #                  'source $SCRATCH/pytorchCuda/bin/activate',
+    #                  'export PYTHONPATH=$SCRATCH/pytorchCuda/lib/' +\
+    #                  'python3.5/site-packages:$PYTHONPATH',
+    #                  'export CUDA_VISIBLE_DEVICES=%d' % device]
+    #task1.executable = 'python3'   # Assign executable to the task
+#
+    ## Assign arguments for the task executable
+    #task1.arguments = ['predict_raster.py',
+    #                   '--input_image', image.split('/')[-1],
+    #                   '--model_architecture', model_arch,
+    #                   '--hyperparameter_set', hyperparam_set,
+    #                   '--training_set', training_set,
+    #                   '--test_folder', '$NODE_LFS_PATH/%s' % task0.name,
+    #                   '--model_path', './',
+    #                   '--output_folder', './%s' % image.split('/')[-1].
+    #                                                     split('.')[0]]
+    #task1.link_input_data = ['$SHARED/%s.tar' % model_name]
+    #task1.upload_input_data = [os.path.abspath('../predicting/' +
+    #                                           'predict_raster.py'),
+    #                           os.path.abspath('../predicting/' +
+    #                                           'predict_sealnet.py'),
+    #                           os.path.abspath('../utils/')]
+    #task1.cpu_reqs = {'processes': 1, 'threads_per_process': 1,
+    #                  'thread_type': 'OpenMP'}
+    #task1.gpu_reqs = {'processes': 1, 'threads_per_process': 1,
+    #                  'thread_type': 'OpenMP'}
+    ## Download resuting images
+    #task1.download_output_data = ['%s/ > %s' % (image.split('/')[-1].
+    #                                                  split('.')[0],
+    #                                            image.split('/')[-1])]
+    #task1.tag = task0.name
+#
+    #stage1.add_tasks(task1)
+    ## Add Stage to the Pipeline
+    #entk_pipeline.add_stages(stage1)
 
     return entk_pipeline
-
-
-def create_aggregated_output(image_names, path):
-
-    '''
-    This function takes a list of images and aggregates the results into a
-    single CSV file
-    '''
-
-    aggr_results = pd.DataFrame(columns=['Image', 'Seals'])
-    for image in image_names:
-        image_pred = pd.read_csv(path + image.split('/')[-1] +
-                                 '_predictions.csv')
-        aggr_results.loc[len(aggr_results)] = [image.split('/')[-1],
-                                               image_pred['predictions'].sum()]
-
-    aggr_results.to_csv(path + '/seal_predictions.csv', index=False)
 
 
 def args_parser():
@@ -191,9 +158,6 @@ def args_parser():
     parser.add_argument('-w', '--walltime', type=int,
                         help='The amount of time resources are requested in' +
                         ' minutes')
-    parser.add_argument('--scale_bands', type=str,
-                        help='for multi-scale models, string with size of' +
-                        ' scale bands separated by spaces')
     parser.add_argument('--name', type=str,
                         help='name of the execution. It has to be a unique' +
                         ' value')
@@ -221,32 +185,24 @@ if __name__ == '__main__':
 
         # Assign resource manager to the Application Manager
         appman.resource_desc = res_dict
-        appman.shared_data = [os.path.abspath('../../models/Heatmap-Cnt/' +
-                                              'UnetCntWRN/' +
-                                              'UnetCntWRN_ts-vanilla.tar')]
+        appman.shared_data = [os.path.abspath('../../models/unet_weights.hdf5')]
         # Create a task that discovers the dataset
-        #disc_pipeline = generate_discover_pipeline(args.input_dir)
-        #appman.workflow = set([disc_pipeline])
+        disc_pipeline = generate_discover_pipeline(args.input_dir)
+        appman.workflow = set([disc_pipeline])
 
         # Run
-        #appman.run()
-
-        images = pd.read_csv('Des3Images.csv')
-        #images.sort_values(by='Size',axis=0,inplace=True)
-        #images.reset_index(drop='index',inplace=True)
+        appman.run()
+        images = pd.from_csv('images.csv')
+        
         print('Images Found:', len(images))
         # Create a single pipeline per image
         pipelines = list()
         dev = 0
-        for idx in range(0,3097):
+        for idx in range(0,len(images)):
             p1 = generate_pipeline(name='P%s' % idx,
                                    image=images['Filename'][idx],
                                    image_size=images['Size'][idx],
-                                   scale_bands=args.scale_bands,
-                                   model_arch=args.model,
-                                   training_set='test_vanilla',
-                                   model_name='UnetCntWRN_ts-vanilla',
-                                   hyperparam_set='A',
+                                   model_name='test',
                                    device=dev)
             dev = dev ^ 1
             pipelines.append(p1)
