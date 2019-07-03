@@ -70,8 +70,8 @@ def generate_pipeline(name, image, image_size, model_name, device):
     task0.executable = 'matlab'   # Assign executable to the task
     # Assign arguments for the task executable
     task0.arguments = ["-nodisplay", "-nosplash", "-r",
-                       "multipagetiff('%s','$NODE_LFS_PATH/%s');exit" % (image.split('/')[-1],
-                                                               task0.name)] 
+                       "multipagetiff('%s','$NODE_LFS_PATH/%s');exit"
+                       % (image.split('/')[-1], task0.name)] 
     task0.upload_input_data = [os.path.abspath('../utils/multipagetiff.m'),
                                os.path.abspath('../utils/saveastiff.m')]
     task0.link_input_data = [image]
@@ -83,48 +83,34 @@ def generate_pipeline(name, image, image_size, model_name, device):
     # Add Stage to the Pipeline
     entk_pipeline.add_stages(stage0)
 
-    ## Create a Stage object
-    #stage1 = Stage()
-    #stage1.name = '%s-S1' % (name)
-    ## Create Task 1, training
-    #task1 = Task()
-    #task1.name = '%s-T1' % stage1.name
-    #task1.pre_exec = ['module load psc_path/1.1',
-    #                  'module load slurm/default',
-    #                  'module load intel/17.4',
-    #                  'module load python3',
-    #                  'module load cuda',
-    #                  'source $SCRATCH/pytorchCuda/bin/activate',
-    #                  'export PYTHONPATH=$SCRATCH/pytorchCuda/lib/' +\
-    #                  'python3.5/site-packages:$PYTHONPATH',
-    #                  'export CUDA_VISIBLE_DEVICES=%d' % device]
-    #task1.executable = 'python3'   # Assign executable to the task
-#
-    ## Assign arguments for the task executable
-    #task1.arguments = ['predict_raster.py',
-    #                   '--input_image', image.split('/')[-1],
-    #                   '--model_architecture', model_arch,
-    #                   '--hyperparameter_set', hyperparam_set,
-    #                   '--training_set', training_set,
-    #                   '--test_folder', '$NODE_LFS_PATH/%s' % task0.name,
-    #                   '--model_path', './',
-    #                   '--output_folder', './%s' % image.split('/')[-1].
-    #                                                     split('.')[0]]
-    #task1.link_input_data = ['$SHARED/%s.tar' % model_name]
-    #task1.upload_input_data = [os.path.abspath('../predicting/' +
-    #                                           'predict_raster.py'),
-    #                           os.path.abspath('../predicting/' +
-    #                                           'predict_sealnet.py'),
-    #                           os.path.abspath('../utils/')]
-    #task1.cpu_reqs = {'processes': 1, 'threads_per_process': 1,
-    #                  'thread_type': 'OpenMP'}
-    #task1.gpu_reqs = {'processes': 1, 'threads_per_process': 1,
-    #                  'thread_type': 'OpenMP'}
-    ## Download resuting images
-    #task1.download_output_data = ['%s/ > %s' % (image.split('/')[-1].
-    #                                                  split('.')[0],
-    #                                            image.split('/')[-1])]
-    #task1.tag = task0.name
+    # Create a Stage object
+    stage1 = Stage()
+    stage1.name = '%s-S1' % (name)
+    # Create Task 1, training
+    task1 = Task()
+    task1.name = '%s-T1' % stage1.name
+    task1.pre_exec = ['module load anaconda3/2019.03',
+                      'source activate keras-gpu'
+                      'export CUDA_VISIBLE_DEVICES=%d' % device]
+    task1.executable = 'python3'   # Assign executable to the task
+
+    # Assign arguments for the task executable
+    task1.arguments = ['predict.py',
+                       '--input', '$NODE_LFS_PATH/%s/multi-' % (task0.name, image.split('/')[-1]),
+                       '--output_folder', '$NODE_LFS_PATH/%s' % task1.name]
+    task1.link_input_data = ['$SHARED/unet_weights.hdf5']
+    task1.upload_input_data = [os.path.abspath('../classification/predict.py'),
+                               os.path.abspath('../classification/' +
+                                               'gen_patches.py'),
+                               os.path.abspath('../classification/' +
+                                               'train_unet.py'),
+                               os.path.abspath('../classification/' +
+                                               'unet_model.py')]
+    task1.cpu_reqs = {'processes': 1, 'threads_per_process': 1,
+                      'thread_type': 'OpenMP'}
+    task1.gpu_reqs = {'processes': 1, 'threads_per_process': 1,
+                      'thread_type': 'OpenMP'}
+    task1.tag = task0.name
 #
     #stage1.add_tasks(task1)
     ## Add Stage to the Pipeline
