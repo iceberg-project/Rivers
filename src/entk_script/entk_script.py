@@ -69,12 +69,12 @@ def generate_pipeline(name, image, image_size, model_name, device):
     task0.pre_exec = ['module load matlab']
     task0.executable = 'matlab'   # Assign executable to the task
     # Assign arguments for the task executable
-    task0.arguments = ['-nodisplay', '-nosplash', '-r',
-                       'multipagetiff("%s","$NODE_LFS_PATH/%s")' % (image,
-                                                               task0.name)]
-    task0.link_input_data = [image]
+    task0.arguments = ["-nodisplay", "-nosplash", "-r",
+                       "multipagetiff('%s','$NODE_LFS_PATH/%s');exit" % (image.split('/')[-1],
+                                                               task0.name)] 
     task0.upload_input_data = [os.path.abspath('../utils/multipagetiff.m'),
                                os.path.abspath('../utils/saveastiff.m')]
+    task0.link_input_data = [image]
     task0.cpu_reqs = {'processes': 1, 'threads_per_process': 1,
                       'thread_type': 'OpenMP'}
     task0.lfs_per_process = image_size
@@ -192,7 +192,8 @@ if __name__ == '__main__':
 
         # Run
         appman.run()
-        images = pd.from_csv('images.csv')
+        print('Run Discovery')
+        images = pd.read_csv('images.csv')
         
         print('Images Found:', len(images))
         # Create a single pipeline per image
@@ -216,4 +217,5 @@ if __name__ == '__main__':
 
     finally:
         # Now that all images have been analyzed, release the resources.
+        print('Closing resources')
         appman.resource_terminate()
