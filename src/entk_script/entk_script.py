@@ -90,15 +90,15 @@ def generate_pipeline(name, image, image_size, model_name, device):
     task1 = Task()
     task1.name = '%s-T1' % stage1.name
     task1.pre_exec = ['module load anaconda3/2019.03',
-                      'source activate keras-gpu'
+                      'source activate keras-gpu',
                       'export CUDA_VISIBLE_DEVICES=%d' % device]
     task1.executable = 'python3'   # Assign executable to the task
 
     # Assign arguments for the task executable
     task1.arguments = ['predict.py',
-                       '--input', '$NODE_LFS_PATH/%s/multi-' % (task0.name, image.split('/')[-1]),
+                       '--input', '$NODE_LFS_PATH/%s/multipage-%s' % (task0.name, image.split('/')[-1]),
                        '--output_folder', '$NODE_LFS_PATH/%s' % task1.name]
-    task1.link_input_data = ['$SHARED/unet_weights.hdf5']
+    task1.link_input_data = ['$SHARED/unet_weights.hdf5 > weights/unet_weights.hdf5']
     task1.upload_input_data = [os.path.abspath('../classification/predict.py'),
                                os.path.abspath('../classification/' +
                                                'gen_patches.py'),
@@ -111,10 +111,10 @@ def generate_pipeline(name, image, image_size, model_name, device):
     task1.gpu_reqs = {'processes': 1, 'threads_per_process': 1,
                       'thread_type': 'OpenMP'}
     task1.tag = task0.name
-#
-    #stage1.add_tasks(task1)
-    ## Add Stage to the Pipeline
-    #entk_pipeline.add_stages(stage1)
+
+    stage1.add_tasks(task1)
+    # Add Stage to the Pipeline
+    entk_pipeline.add_stages(stage1)
 
     return entk_pipeline
 
@@ -163,45 +163,43 @@ if __name__ == '__main__':
                 'project': args.project,
                 'queue': args.queue}
 
-    try:
-
         # Create Application Manager
-        appman = AppManager(port=32773, hostname='localhost', name=args.name,
+    appman = AppManager(port=32773, hostname='localhost', name=args.name,
                             autoterminate=False, write_workflow=True)
 
         # Assign resource manager to the Application Manager
-        appman.resource_desc = res_dict
-        appman.shared_data = [os.path.abspath('../../models/unet_weights.hdf5')]
+    appman.resource_desc = res_dict
+    appman.shared_data = [os.path.abspath('../../models/unet_weights.hdf5')]
         # Create a task that discovers the dataset
-        disc_pipeline = generate_discover_pipeline(args.input_dir)
-        appman.workflow = set([disc_pipeline])
+    disc_pipeline = generate_discover_pipeline(args.input_dir)
+    appman.workflow = set([disc_pipeline])
 
         # Run
-        appman.run()
-        print('Run Discovery')
-        images = pd.read_csv('images.csv')
+    appman.run()
+    print('Run Discovery')
+    images = pd.read_csv('images.csv')
         
-        print('Images Found:', len(images))
-        # Create a single pipeline per image
-        pipelines = list()
-        dev = 0
-        for idx in range(0,len(images)):
-            p1 = generate_pipeline(name='P%s' % idx,
+    print('Images Found:', len(images))
+    # Create a single pipeline per image
+    pipelines = list()
+    dev = 0
+    for idx in range(0,len(images)):
+        p1 = generate_pipeline(name='P%s' % idx,
                                    image=images['Filename'][idx],
                                    image_size=images['Size'][idx],
                                    model_name='test',
                                    device=dev)
-            dev = dev ^ 1
-            pipelines.append(p1)
+        dev = dev ^ 1
+        pipelines.append(p1)
         # Assign the workflow as a set of Pipelines to the Application Manager
-        appman.workflow = set(pipelines)
+    appman.workflow = set(pipelines)
 
         # Run the Application Manager
-        appman.run()
+    appman.run()
 
-        print('Done')
+    print('Done')
 
-    finally:
+    #finally:
         # Now that all images have been analyzed, release the resources.
-        print('Closing resources')
-        appman.resource_terminate()
+    print('Closing resources')
+    appman.resource_terminate()
