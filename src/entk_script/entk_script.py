@@ -45,7 +45,7 @@ def generate_discover_pipeline(path):
     return pipeline
 
 
-def generate_pipeline(name, image, image_size, model_name, device):
+def generate_pipeline(name, image, image_size, device):
 
     '''
     This function creates a pipeline for an image that will be analyzed.
@@ -54,7 +54,6 @@ def generate_pipeline(name, image, image_size, model_name, device):
         :name: Pipeline name, str
         :image: image path, str
         :image_size: image size in MBs, int
-        :model_name: Prediction Model Name, str
         :device: Which GPU device will be used by this pipeline, int
     '''
     # Create a Pipeline object
@@ -93,12 +92,13 @@ def generate_pipeline(name, image, image_size, model_name, device):
                       'source activate keras-gpu',
                       'export CUDA_VISIBLE_DEVICES=%d' % device]
     task1.executable = 'python3'   # Assign executable to the task
-
     # Assign arguments for the task executable
     task1.arguments = ['predict.py',
-                       '--input', '$NODE_LFS_PATH/%s/multipage-%s' % (task0.name, image.split('/')[-1]),
+                       '--input', '$NODE_LFS_PATH/%s/multipage-%s' %
+                       (task0.name, image.split('/')[-1]),
                        '--output_folder', '$NODE_LFS_PATH/%s' % task1.name]
-    task1.link_input_data = ['$SHARED/unet_weights.hdf5 > weights/unet_weights.hdf5']
+    task1.link_input_data = ['$SHARED/unet_weights.hdf5 >' +
+                             'weights/unet_weights.hdf5']
     task1.upload_input_data = [os.path.abspath('../classification/predict.py'),
                                os.path.abspath('../classification/' +
                                                'gen_patches.py'),
@@ -188,44 +188,45 @@ if __name__ == '__main__':
                 'schema': 'gsissh',
                 'project': args.project,
                 'queue': args.queue}
-
+    try:
         # Create Application Manager
-    appman = AppManager(port=32773, hostname='localhost', name=args.name,
+        appman = AppManager(port=32773, hostname='localhost', name=args.name,
                             autoterminate=False, write_workflow=True)
 
         # Assign resource manager to the Application Manager
-    appman.resource_desc = res_dict
-    appman.shared_data = [os.path.abspath('../../models/unet_weights.hdf5')]
+        appman.resource_desc = res_dict
+        appman.shared_data = [os.path.abspath('../../models/unet_weights.hdf5')]
         # Create a task that discovers the dataset
-    disc_pipeline = generate_discover_pipeline(args.input_dir)
-    appman.workflow = set([disc_pipeline])
+        disc_pipeline = generate_discover_pipeline(args.input_dir)
+        appman.workflow = set([disc_pipeline])
 
         # Run
-    appman.run()
-    print('Run Discovery')
-    images = pd.read_csv('images.csv')
+        appman.run()
+        print('Run Discovery')
+        images = pd.read_csv('images.csv')
         
-    print('Images Found:', len(images))
-    # Create a single pipeline per image
-    pipelines = list()
-    dev = 0
-    for idx in range(0,len(images)):
-        p1 = generate_pipeline(name='P%s' % idx,
+        print('Images Found:', len(images))
+        # Create a single pipeline per image
+        pipelines = list()
+        dev = 0
+        for idx in range(0, len(images)):
+            p1 = generate_pipeline(name='P%s' % idx,
                                    image=images['Filename'][idx],
                                    image_size=images['Size'][idx],
-                                   model_name='test',
                                    device=dev)
         dev = dev ^ 1
         pipelines.append(p1)
         # Assign the workflow as a set of Pipelines to the Application Manager
-    appman.workflow = set(pipelines)
+        appman.workflow = set(pipelines)
 
         # Run the Application Manager
-    appman.run()
+        appman.run()
 
-    print('Done')
-
-    #finally:
+        print('Done')
+    except Exception as e:
+        # Something unexpected happened in the code above
+        print('Caught Error: %s' % e)
+    finally:
         # Now that all images have been analyzed, release the resources.
-    print('Closing resources')
-    appman.resource_terminate()
+        print('Closing resources')
+        appman.resource_terminate()
