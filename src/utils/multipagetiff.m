@@ -6,10 +6,11 @@
 
 function multipagetiff(ReadImage, WriteDir)
 
-if ~exist(WriteDir, 'dir')
-    mkdir(WriteDir);
-end
+    if ~exist(WriteDir, 'dir')
+        mkdir(WriteDir);
+    end
 
-image = geotiffread(ReadImage);
-writeFileName = strcat(WriteDir,'/multipage-',num2str(ReadImage));
-saveastiff(image,writeFileName);
+    image = geotiffread(ReadImage);
+    writeFileName = strcat(WriteDir,'/multipage-',num2str(ReadImage));
+    saveastiff(image,writeFileName);
+end

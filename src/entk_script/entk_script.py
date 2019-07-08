@@ -116,6 +116,32 @@ def generate_pipeline(name, image, image_size, model_name, device):
     # Add Stage to the Pipeline
     entk_pipeline.add_stages(stage1)
 
+    # Create a Stage object
+    stage2 = Stage()
+    stage2.name = '%s-S2' % (name)
+    # Create Task 1, training
+    task2 = Task()
+    task2.name = '%s-T2' % stage2.name
+    task2.pre_exec = ['module load matlab']
+    task2.executable = 'matlab'   # Assign executable to the task
+    # Assign arguments for the task executable
+    task2.arguments = ["-nodisplay", "-nosplash", "-r",
+                       "mosaic('%s', './', $NODE_LFS_PATH/%s');exit"
+                       % (image.split('/')[-1], task1.name)]
+    task2.link_input_data = [image]
+    task2.upload_input_data = [os.path.abspath('../classification/mosaic.m'),
+                               os.path.abspath('../classification/' +
+                                               'natsortfiles.m'),
+                               os.path.abspath('../classification/' +
+                                               'natsort.m')]
+    task2.cpu_reqs = {'processes': 1, 'threads_per_process': 1,
+                      'thread_type': 'OpenMP'}
+    task2.tag = task1.name
+
+    stage2.add_tasks(task2)
+    # Add Stage to the Pipeline
+    entk_pipeline.add_stages(stage2)
+
     return entk_pipeline
 
 
