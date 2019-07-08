@@ -5,6 +5,14 @@
 function mosaic(FileName, FilePath, PredictedPath)
     File = fullfile(FilePath,FileName);
     [img, R] = geotiffread(File);
+    if isunix
+        path = 'data/WV_predicted';
+    elseif ispc
+        path = 'data\WV_predicted';
+    else
+        path = ''
+        disp 'Something went wrong';
+    end
 
     patch_size=800;
 
@@ -21,14 +29,14 @@ function mosaic(FileName, FilePath, PredictedPath)
     A=zeros(a(1,end)+(patch_size/2)-1,b(1,end)+(patch_size/2)-1,'single');
     B=zeros(a(1,end)+(patch_size/2)-1,b(1,end)+(patch_size/2)-1,'single');
 
-    files = dir(fullfile(PredictedPath,'data/WV_predicted', '*.tif'));
+    files = dir(fullfile(PredictedPath, path, '*.tif'));
     files_ordered = natsortfiles({files.name});
     totalFiles = numel(files);
 
     k=1;
     for i=1:size(row,2)
         for j=1:size(col,2)
-            I=imread(fullfile(PredictedPath, 'data/WV_predicted', files_ordered{1,k}));
+            I=imread(fullfile(PredictedPath, path, files_ordered{1,k}));
             A(row(i):row(i)+patch_size-1,col(j):col(j)+patch_size-1)=I;
             B=max(A,B);
             if k~=totalFiles

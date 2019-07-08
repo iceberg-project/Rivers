@@ -11,6 +11,13 @@ function multipagetiff(ReadImage, WriteDir)
     end
 
     image = geotiffread(ReadImage);
-    writeFileName = strcat(WriteDir,'/multipage-',num2str(ReadImage));
+    if isunix
+        writeFileName = strcat(WriteDir,'/multipage-',num2str(ReadImage));
+    elseif ispc
+        writeFileName = strcat(WriteDir,'\multipage-',num2str(ReadImage));
+    else
+        disp 'Something went wrong';
+    end
+
     saveastiff(image,writeFileName);
 end
