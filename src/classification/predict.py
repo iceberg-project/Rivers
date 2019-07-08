@@ -12,6 +12,7 @@ import tifffile as tiff
 
 from train_unet import weights_path, get_model, normalize, PATCH_SZ, N_CLASSES
 
+
 def predict(x, model, patch_sz=160, n_classes=2):
     img_height = x.shape[0]
     img_width = x.shape[1]
@@ -50,12 +51,14 @@ def predict(x, model, patch_sz=160, n_classes=2):
         prediction[x0:x1, y0:y1, :] = patches_predict[k, :, :, :]
     return prediction[:img_height, :img_width, :]
 
+
 # generating sliding window
 def sliding_window(img, stepSize, windowSize):
     for y in range(0, img.shape[0], stepSize):
         for x in range(0, img.shape[1], stepSize):
             yield (x, y, img[y:y + windowSize, x:x + windowSize, :])
-                        
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input', type=str,
@@ -69,7 +72,7 @@ def main():
     outPath = args.output_folder + "data/WV_predicted"
     if not os.path.exists(outPath):
         os.makedirs(outPath)
-		
+
     image = normalize(tiff.imread(args.input).transpose([1, 2, 0]))
     wind_row, wind_col = 800, 800 # dimensions of the image
     windowSize = 800 
@@ -85,7 +88,7 @@ def main():
         if window.shape[0] != wind_row or window.shape[1] != wind_col:
             continue
         # the image which has to be predicted
-        t_img = img[y:y+wind_row, x:x+wind_col, :]
+        t_img = img[y:y + wind_row, x:x + wind_col, :]
         mask = predict(t_img, model, patch_sz=PATCH_SZ,
                        n_classes=N_CLASSES).transpose([2, 0, 1]) 
         cnt = str(i)
@@ -93,6 +96,7 @@ def main():
         fullpath = os.path.join(outPath, imagename)
         tiff.imsave(fullpath, mask)
         i += 1
-        
+
+
 if __name__ == '__main__':                     
     main()
