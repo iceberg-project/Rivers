@@ -6,7 +6,7 @@
 % It tiles an 8-bit 3-band WV image and its corresponding 8-bit river mask to windows of 800 by 800 with steps of 400,
 % and saves the multi-page format of the generated tils in the 'tiled multi-page image' and 'tiled multi-page river mask' folders.
 
-function tiling_pretraining(FileName1, FileName2)
+function tiling_pretraining(FileName1, FileName2, patch_size, step)
     
     if ~isstring(FileName1)
         error('Error. FileName1 must be a string.')
@@ -25,24 +25,19 @@ function tiling_pretraining(FileName1, FileName2)
     river_mask = imread(fullfile(PathName2, FileName2));
     
     river_mask(river_mask~=0)=255;
-
-    WriteDir1 = fullfile(pwd, 'tiled-multi-page-image');
+    tmp_folder = split(FileName1,".");
+    WriteDir1 = fullfile(pwd, 'tiled-multi-page-image', tmp_folder(1));
     if ~exist(WriteDir1, 'dir')
         mkdir(WriteDir1);
     end
 
-    WriteDir2 = fullfile(pwd, 'tiled-multi-page-river-mask');
+    WriteDir2 = fullfile(pwd, 'tiled-multi-page-river-mask', tmp_folder(1));
     if ~exist(WriteDir2, 'dir')
         mkdir(WriteDir2);
     end
 
-    patch_size=800;
-
     a=1:patch_size:size(image, 1);
     b=1:patch_size:size(image, 2);
-
-    step=400;
-
 
     k=1;
     for row = 1:step:a(1,end-1)
