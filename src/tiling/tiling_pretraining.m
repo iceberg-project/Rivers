@@ -26,12 +26,12 @@ function tiling_pretraining(FileName1, FileName2)
     
     river_mask(river_mask~=0)=255;
 
-    WriteDir1 = fullfile(pwd, 'tiled multi-page image');
+    WriteDir1 = fullfile(pwd, 'tiled-multi-page-image');
     if ~exist(WriteDir1, 'dir')
         mkdir(WriteDir1);
     end
 
-    WriteDir2 = fullfile(pwd, 'tiled multi-page river mask');
+    WriteDir2 = fullfile(pwd, 'tiled-multi-page-river-mask');
     if ~exist(WriteDir2, 'dir')
         mkdir(WriteDir2);
     end
