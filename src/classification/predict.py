@@ -63,7 +63,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input', type=str,
                         help='Input Multipage Image')
-    parser.add_argument('-o', '----output_folder', type=str,
+    parser.add_argument('-o', '--output_folder', type=str,
                         help='Path where output will be stored.')
 
     args = parser.parse_args()
