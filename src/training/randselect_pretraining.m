@@ -9,39 +9,50 @@
 clear all
 clc
 
-WriteDir1 = fullfile(pwd, 'data\image_tiles_fortraining\');
+WriteDir1 = fullfile(pwd, 'data/image_tiles_fortraining/');
 if ~exist(WriteDir1, 'dir')
     mkdir(WriteDir1);
 end
 
-WriteDir2 = fullfile(pwd, 'data\image_tiles_fortest\');
+WriteDir2 = fullfile(pwd, 'data/image_tiles_fortest/');
 if ~exist(WriteDir2, 'dir')
     mkdir(WriteDir2);
 end
 
-WriteDir3 = fullfile(pwd, 'data\mask_tiles_fortraining\');
+WriteDir3 = fullfile(pwd, 'data/mask_tiles_fortraining/');
 if ~exist(WriteDir3, 'dir')
     mkdir(WriteDir3);
 end
 
-WriteDir4 = fullfile(pwd, 'data\mask_tiles_fortest\');
+WriteDir4 = fullfile(pwd, 'data/mask_tiles_fortest/');
 if ~exist(WriteDir4, 'dir')
     mkdir(WriteDir4);
 end
 
-FileList1 = dir(fullfile('tiling\tiled multi-page image', '*.tif'));
+
+FileList1 = dir(fullfile('../tiling/tiled-multi-page-image/*', '*.tif'));
+
 index    = randperm(numel(FileList1), floor(0.8*numel(FileList1)));
+
 for k = 1:floor(0.8*numel(FileList1))
-    movefile(fullfile('tiling\tiled multi-page image', FileList1(index(k)).name), fullfile(WriteDir1, sprintf('%02d.tif', k)));
-    movefile(fullfile('tiling\tiled multi-page river mask', FileList1(index(k)).name), fullfile(WriteDir3, sprintf('%02d.tif', k)));
+    movefile(fullfile(FileList1(index(k)).folder, FileList1(index(k)).name), fullfile(WriteDir1, sprintf(sprintf('%.02d.tif', k))));
 end
 
-FileList2 = dir(fullfile('tiling\tiled multi-page image', '*.tif'));
+FileList2 = dir(fullfile('../tiling/tiled-multi-page-image/*', '*.tif'));
 for k = 1:numel(FileList2)
-    movefile(['tiling\tiled multi-page image\' FileList2(k).name],[WriteDir2 'Test-' FileList2(k).name]);
-    movefile(['tiling\tiled multi-page river mask\' FileList2(k).name], [WriteDir4 'Test-' FileList2(k).name]);
+    movefile(fullfile(FileList2(k).folder, FileList2(k).name),[WriteDir2 'Test-' sprintf('%.02d.tif', k)]);
 end
 
-rmdir('tiling\tiled multi-page image','s')
-rmdir('tiling\tiled multi-page river mask','s')
+FileList1 = dir(fullfile('../tiling/tiled-multi-page-river-mask/*', '*.tif'));
+for k = 1:floor(0.8*numel(FileList1))
+    movefile(fullfile(FileList1(index(k)).folder, FileList1(index(k)).name), fullfile(WriteDir3, sprintf(sprintf('%.02d.tif', k))));
+end
+
+FileList2 = dir(fullfile('../tiling/tiled-multi-page-river-mask/*', '*.tif'));
+for k = 1:numel(FileList2)
+   movefile(fullfile(FileList2(k).folder, FileList2(k).name),[WriteDir4 'Test-' sprintf('%.02d.tif', k)]);
+end
+
+rmdir('tiling/tiled-multi-page-image','s')
+rmdir('tiling/tiled-multi-page-river-mask','s')
 
