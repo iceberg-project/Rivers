@@ -59,6 +59,6 @@ function mosaic(FileName, FilePath, WriteDir)
     subR.XLimWorld = sort(xlimits);
     subR.YLimWorld = sort(ylimits);
     info = geotiffinfo(File);
-    writeFileName=[strtok(FileName, '.'),'-mask-predicted.tif'];
+    writeFileName=fullfile(WriteDir,strcat(strtok(FileName, '.'),'-mask-predicted.tif'));
     geotiffwrite(writeFileName,B,subR,'GeoKeyDirectoryTag',info.GeoTIFFTags.GeoKeyDirectoryTag,'TiffTags',struct('Compression',Tiff.Compression.None))
 end

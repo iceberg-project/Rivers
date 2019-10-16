@@ -62,14 +62,18 @@ def sliding_window(img, stepSize, windowSize):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input', type=str,
-                        help='Input Multipage Image', required=True)
+                        help='Path and Filename of the 3-Band Multipage WV \
+                              Image', required=True)
     parser.add_argument('-o', '--output_folder', type=str, default='./'
                         help='Path where output will be stored.')
 
     args = parser.parse_args()
     model = get_model()
     model.load_weights(weights_path)
-    outPath = args.output_folder + "data/WV_predicted"
+    head, tail = os.path.split(args.input)
+    getName = tail.split('-multipage.tif')
+    outPath = args.output_folder + "data/predicted_tiles/" + getName[0]
+
     if not os.path.exists(outPath):
         os.makedirs(outPath)
 
