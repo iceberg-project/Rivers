@@ -45,7 +45,7 @@ def generate_discover_pipeline(path):
     return pipeline
 
 
-def generate_pipeline(name, image, image_size, device):
+def generate_pipeline(name, image, image_size):
 
     '''
     This function creates a pipeline for an image that will be analyzed.
@@ -89,8 +89,7 @@ def generate_pipeline(name, image, image_size, device):
     task1 = Task()
     task1.name = '%s-T1' % stage1.name
     task1.pre_exec = ['module load anaconda3/2019.03',
-                      'source activate keras-gpu',
-                      'export CUDA_VISIBLE_DEVICES=%d' % device]
+                      'source activate keras-gpu']
     task1.executable = 'python3'   # Assign executable to the task
     # Assign arguments for the task executable
     task1.arguments = ['predict.py',
@@ -208,13 +207,11 @@ if __name__ == '__main__':
         print('Images Found:', len(images))
         # Create a single pipeline per image
         pipelines = list()
-        dev = 0
+
         for idx in range(0, len(images)):
             p1 = generate_pipeline(name='P%s' % idx,
                                    image=images['Filename'][idx],
-                                   image_size=images['Size'][idx],
-                                   device=dev)
-        dev = dev ^ 1
+                                   image_size=images['Size'][idx])
         pipelines.append(p1)
         # Assign the workflow as a set of Pipelines to the Application Manager
         appman.workflow = set(pipelines)
