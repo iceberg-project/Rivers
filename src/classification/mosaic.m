@@ -8,7 +8,7 @@ function mosaic(FileName, FilePath, WriteDir)
     if isunix
         path = strcat('data/predicted_tiles',strtok(FileName, '.'));
     elseif ispc
-        path = strcat('data\predicted_tiles',strtok(FileName, '.'));
+        path = strcat('data\predicted_tiles\',strtok(FileName, '.'));
     else
         path = '';
         disp 'Something went wrong';
