@@ -6,7 +6,7 @@ function mosaic(FileName, FilePath, WriteDir)
     File = fullfile(FilePath,FileName);
     [img, R] = geotiffread(File);
     if isunix
-        path = strcat('data/predicted_tiles',strtok(FileName, '.'));
+        path = strcat('data/predicted_tiles/',strtok(FileName, '.'));
     elseif ispc
         path = strcat('data\predicted_tiles\',strtok(FileName, '.'));
     else
