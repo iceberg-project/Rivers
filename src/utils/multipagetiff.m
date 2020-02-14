@@ -25,5 +25,5 @@ function multipagetiff(ReadDir, WriteDir)
             disp 'Something went wrong';
         end
 
-        saveastiff(image,writeFileName);
+        saveastiff(image,char(writeFileName));
 end
