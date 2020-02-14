@@ -23,7 +23,7 @@ function mosaic(FileName, FilePath, WriteDir)
     desired_row_size=(patch_size/2)*ceil(size(img,1)/(patch_size/2));
     desired_col_size=(patch_size/2)*ceil(size(img,2)/(patch_size/2));
 
-    image = zeros(desired_row_size,desired_col_size,size(img,3),'int16');
+    image = zeros(desired_row_size,desired_col_size,size(img,3),'int8');
     image(1:size(img,1),1:size(img,2),:) = img;
 
     a=1:patch_size/2:size(image, 1);
