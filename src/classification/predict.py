@@ -64,7 +64,8 @@ def main():
     parser.add_argument('-i', '--input', type=str,
                         help='Path and Filename of the 3-Band Multipage WV \
                               Image', required=True)
-    parser.add_argument('-o', '--output_folder', type=str, default='./'
+    parser.add_argument('-o', '--output_folder', type=str, default='./',
+
                         help='Path where output will be stored.')
 
     args = parser.parse_args()
@@ -96,7 +97,8 @@ def main():
         mask = predict(t_img, model, patch_sz=PATCH_SZ,
                        n_classes=N_CLASSES).transpose([2, 0, 1]) 
         cnt = str(i)
-        imagename = "image" + cnt + ".tif"
+        imagename = cnt + ".tif"
+
         fullpath = os.path.join(outPath, imagename)
         tiff.imsave(fullpath, mask)
         i += 1
