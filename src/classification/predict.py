@@ -97,7 +97,8 @@ def main():
         mask = predict(t_img, model, patch_sz=PATCH_SZ,
                        n_classes=N_CLASSES).transpose([2, 0, 1]) 
         cnt = str(i)
-        imagename = "image" + cnt + ".tif"
+        imagename = cnt + ".tif"
+
         fullpath = os.path.join(outPath, imagename)
         tiff.imsave(fullpath, mask)
         i += 1
