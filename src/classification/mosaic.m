@@ -33,7 +33,7 @@ function mosaic(FileName, FilePath, WriteDir)
     A=zeros(a(1,end)+(patch_size/2)-1,b(1,end)+(patch_size/2)-1,'single');
     B=zeros(a(1,end)+(patch_size/2)-1,b(1,end)+(patch_size/2)-1,'single');
 
-    files = dir(fullfile(WriteDir, path, '*.tif'));
+    files = dir(fullfile(path, '*.tif'));
     files_ordered = natsortfiles({files.name});
     totalFiles = numel(files);
 
