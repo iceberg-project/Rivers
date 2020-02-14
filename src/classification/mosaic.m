@@ -40,7 +40,7 @@ function mosaic(FileName, FilePath, WriteDir)
     k=1;
     for i=1:size(row,2)
         for j=1:size(col,2)
-            I=imread(fullfile(WriteDir, path, files_ordered{1,k}));
+            I=imread(fullfile(path, files_ordered{1,k}));
             A(row(i):row(i)+patch_size-1,col(j):col(j)+patch_size-1)=I;
             B=max(A,B);
             if k~=totalFiles
