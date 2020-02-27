@@ -2,13 +2,13 @@
 % License: MIT
 % Copyright: 2018-2019
 
-function mosaic(FileName, FilePath, WriteDir)
+function mosaic(FileName, FilePath, PredictedPath, WriteDir)
     File = fullfile(FilePath,FileName);
     [img, R] = geotiffread(File);
     if isunix
-        path = strcat('data/predicted_tiles/',strtok(FileName, '.'));
+        path = strcat(PredictedPath, '/data/predicted_tiles/', strtok(FileName, '.'));
     elseif ispc
-        path = strcat('data\predicted_tiles\',strtok(FileName, '.'));
+        path = strcat(PredictedPath, '\data\predicted_tiles\', strtok(FileName, '.'));
     else
         path = '';
         disp 'Something went wrong';

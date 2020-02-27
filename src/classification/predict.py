@@ -10,8 +10,7 @@ import argparse
 import numpy as np
 import tifffile as tiff
 
-from train_unet import weights_path, get_model, normalize, PATCH_SZ, N_CLASSES
-
+from train_unet import get_model, normalize, PATCH_SZ, N_CLASSES
 
 def predict(x, model, patch_sz=160, n_classes=2):
     img_height = x.shape[0]
@@ -51,36 +50,34 @@ def predict(x, model, patch_sz=160, n_classes=2):
         prediction[x0:x1, y0:y1, :] = patches_predict[k, :, :, :]
     return prediction[:img_height, :img_width, :]
 
-
 # generating sliding window
 def sliding_window(img, stepSize, windowSize):
     for y in range(0, img.shape[0], stepSize):
         for x in range(0, img.shape[1], stepSize):
             yield (x, y, img[y:y + windowSize, x:x + windowSize, :])
 
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input', type=str,
-                        help='Path and Filename of the 3-Band Multipage WV \
-                              Image', required=True)
+                            help='Path and Filename of the 3-Band Multipage WV \ Image', required=True)
+    parser.add_argument('-w', '--weights_path', type=str,
+                            help='Path to the weights')
     parser.add_argument('-o', '--output_folder', type=str, default='./',
+                            help='Path where output will be stored.')
 
-                        help='Path where output will be stored.')
 
     args = parser.parse_args()
     model = get_model()
-    model.load_weights(weights_path)
+    model.load_weights(args.weights_path)
     head, tail = os.path.split(args.input)
     getName = tail.split('-multipage.tif')
-    outPath = args.output_folder + "data/predicted_tiles/" + getName[0]
-
+    outPath = args.output_folder + "data/predicted_tiles/"+ getName[0]
     if not os.path.exists(outPath):
         os.makedirs(outPath)
 
     image = normalize(tiff.imread(args.input).transpose([1, 2, 0]))
     wind_row, wind_col = 800, 800 # dimensions of the image
-    windowSize = 800 
+    windowSize = 800
     stepSize = 400
 
     desired_row_size = stepSize * math.ceil(image.shape[0] / stepSize)
@@ -95,14 +92,12 @@ def main():
         # the image which has to be predicted
         t_img = img[y:y + wind_row, x:x + wind_col, :]
         mask = predict(t_img, model, patch_sz=PATCH_SZ,
-                       n_classes=N_CLASSES).transpose([2, 0, 1]) 
+                       n_classes=N_CLASSES).transpose([2, 0, 1])
         cnt = str(i)
         imagename = cnt + ".tif"
-
         fullpath = os.path.join(outPath, imagename)
         tiff.imsave(fullpath, mask)
         i += 1
 
-
-if __name__ == '__main__':                     
+if __name__ == '__main__':
     main()

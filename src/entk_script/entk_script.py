@@ -69,7 +69,7 @@ def generate_pipeline(name, image, image_size):
     task0.executable = 'matlab'   # Assign executable to the task
     # Assign arguments for the task executable
     task0.arguments = ["-nodisplay", "-nosplash", "-r",
-                       "multipagetiff('%s','$NODE_LFS_PATH/%s');exit"
+                       "multipagetiff('./','$NODE_LFS_PATH/%s');exit"
                        % (image.split('/')[-1], task0.name)] 
     task0.upload_input_data = [os.path.abspath('../utils/multipagetiff.m'),
                                os.path.abspath('../utils/saveastiff.m')]
@@ -95,7 +95,8 @@ def generate_pipeline(name, image, image_size):
     task1.arguments = ['predict.py',
                        '--input', '$NODE_LFS_PATH/%s/multipage-%s' %
                        (task0.name, image.split('/')[-1]),
-                       '--output_folder', '$NODE_LFS_PATH/%s' % task1.name]
+                       '--output_folder', '$NODE_LFS_PATH/%s' % task1.name,
+                       '--weights_path', 'weights/unet_weights.hdf5']
     task1.link_input_data = ['$SHARED/unet_weights.hdf5 >' +
                              'weights/unet_weights.hdf5']
     task1.upload_input_data = [os.path.abspath('../classification/predict.py'),
