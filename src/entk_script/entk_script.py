@@ -13,7 +13,6 @@ from __future__ import print_function
 import argparse
 import os
 import pandas as pd
-import time
 
 from radical.entk import Pipeline, Stage, Task, AppManager
 
@@ -37,8 +36,8 @@ def generate_discover_pipeline(path):
                       '--filesize']
     task.download_output_data = ['images.csv']
     task.upload_input_data = ['image_disc.py']
-    task.cpu_reqs = {'processes': 1, 'threads_per_process': 1,'process_type': None,
-                     'thread_type': 'OpenMP'}
+    task.cpu_reqs = {'processes': 1, 'threads_per_process': 1,
+                     'process_type': None, 'thread_type': 'OpenMP'}
     stage.add_tasks(task)
     # Add Stage to the Pipeline
     pipeline.add_stages(stage)
@@ -75,8 +74,8 @@ def generate_pipeline(name, image, image_size):
     task0.upload_input_data = [os.path.abspath('../utils/multipagetiff.m'),
                                os.path.abspath('../utils/saveastiff.m')]
     task0.link_input_data = [image]
-    task0.cpu_reqs = {'processes': 1, 'threads_per_process': 1,'process_type': None,
-                      'thread_type': 'OpenMP'}
+    task0.cpu_reqs = {'processes': 1, 'threads_per_process': 1,
+                      'process_type': None, 'thread_type': 'OpenMP'}
     task0.lfs_per_process = int(image_size)
 
     stage0.add_tasks(task0)
@@ -106,10 +105,10 @@ def generate_pipeline(name, image, image_size):
                                                'train_unet.py'),
                                os.path.abspath('../classification/' +
                                                'unet_model.py')]
-    task1.cpu_reqs = {'processes': 1, 'threads_per_process': 1,'process_type': None,
-                      'thread_type': 'OpenMP'}
-    task1.gpu_reqs = {'processes': 1, 'threads_per_process': 1,'process_type': None,
-                      'thread_type': 'OpenMP'}
+    task1.cpu_reqs = {'processes': 1, 'threads_per_process': 1,
+                      'process_type': None, 'thread_type': 'OpenMP'}
+    task1.gpu_reqs = {'processes': 1, 'threads_per_process': 1,
+                      'process_type': None, 'thread_type': 'OpenMP'}
     task1.tag = task0.name
 
     stage1.add_tasks(task1)
@@ -133,8 +132,8 @@ def generate_pipeline(name, image, image_size):
                                                'natsortfiles.m'),
                                os.path.abspath('../classification/' +
                                                'natsort.m')]
-    task2.cpu_reqs = {'processes': 1, 'threads_per_process': 1,'process_type': None,
-                      'thread_type': 'OpenMP'}
+    task2.cpu_reqs = {'processes': 1, 'threads_per_process': 1,
+                      'process_type': None, 'thread_type': 'OpenMP'}
     task2.tag = task1.name
 
     stage2.add_tasks(task2)
@@ -188,8 +187,9 @@ if __name__ == '__main__':
                 'queue': args.queue}
     try:
         # Create Application Manager
-        appman = AppManager(port=33235, hostname='two.radical-project.org', name=args.name,
-                            autoterminate=False, write_workflow=True)
+        appman = AppManager(port=33235, hostname='two.radical-project.org',
+                            name=args.name, autoterminate=False,
+                            write_workflow=True)
 
         # Assign resource manager to the Application Manager
         appman.resource_desc = res_dict
