@@ -27,7 +27,10 @@ install:
 #  - pip install .
 #  - pip install coverage
   - pip install keras
-  - pip install radical.entk
+  - pip install radical.utils==0.72
+  - pip install radical.saga==0.72
+  - pip install radical.pilot==0.72
+  - pip install radical.entk==0.72
   - pip install flake8
   - pip install pylint
 #  - pip install codecov
