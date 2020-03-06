@@ -31,6 +31,8 @@ install:
   - pip install radical.saga==0.72
   - pip install radical.pilot==0.72
   - pip install radical.entk==0.72
+  - pip install tifffile
+  - pip install pandas
   - pip install flake8
   - pip install pylint
 #  - pip install codecov
