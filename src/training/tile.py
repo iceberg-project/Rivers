@@ -1,3 +1,8 @@
+"""
+Authors: Samira Daneshgar-Asl
+License: MIT
+Copyright: 2019-2020
+"""
 import os, gdal
 import argparse
 
