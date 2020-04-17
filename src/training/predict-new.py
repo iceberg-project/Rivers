@@ -10,10 +10,6 @@ from model import *
 from os import listdir
 from keras.preprocessing.image import img_to_array
 from osgeo import gdal
-
-Nonriver = [255,255,255]
-River = [0,0,0]
-COLOR_DICT = np.array([Nonriver,River])
 		
 patch_sz = 256
 
