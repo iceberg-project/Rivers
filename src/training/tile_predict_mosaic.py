@@ -8,10 +8,8 @@ import numpy as np
 import argparse
 import math
 from model import *
-from os import listdir
 from keras.preprocessing.image import img_to_array
 from osgeo import gdal
-from osgeo import gdal_array
 		
 patch_sz = 256
 step_sz = 128
@@ -21,6 +19,8 @@ def load_image(path):
     dataset = gdal.Open(path) 
     image_column = dataset.RasterXSize    
     image_row = dataset.RasterYSize     
+    #print(image_column)
+    #print(image_row)
     image_proj = dataset.GetProjection()
     image_geotrans = dataset.GetGeoTransform()
     image_data = dataset.ReadAsArray(0,0,image_column,image_row) 
@@ -62,7 +62,9 @@ def predict():
     geotrans, proj, image = load_image(args.input)
 
     desired_row_size = step_sz * math.ceil(image.shape[0]/ step_sz)
+    #print(desired_row_size)
     desired_col_size = step_sz * math.ceil(image.shape[1]/ step_sz)
+    #print(desired_col_size)
     desired_image = np.zeros((desired_row_size, desired_col_size, image.shape[2]),
                    dtype=image.dtype)
     desired_image[:image.shape[0], :image.shape[1],:] = image[:,:,:]
@@ -70,8 +72,8 @@ def predict():
     
     mask = np.zeros((desired_row_size,desired_col_size),dtype=np.float64)
 
-    for i in range(0, image.shape[0]-step_sz, step_sz):
-        for j in range(0, image.shape[1]-step_sz, step_sz):
+    for i in range(0, image.shape[0]-(patch_sz-step_sz), step_sz):
+        for j in range(0, image.shape[1]-(patch_sz-step_sz), step_sz):
             # the image which has to be predicted
             tile = desired_image[i:i + patch_sz, j:j + patch_sz,:]
             tile = np.expand_dims(tile, axis=0)
