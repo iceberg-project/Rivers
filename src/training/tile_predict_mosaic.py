@@ -17,15 +17,17 @@ step_sz = 128
 #loading WV image 
 def load_image(path):
     dataset = gdal.Open(path) 
+    band3=dataset.GetRasterBand(3)
+    band5=dataset.GetRasterBand(5)
+    band6=dataset.GetRasterBand(6)
     image_column = dataset.RasterXSize    
     image_row = dataset.RasterYSize     
-    #print(image_column)
-    #print(image_row)
     image_proj = dataset.GetProjection()
     image_geotrans = dataset.GetGeoTransform()
-    image_data = dataset.ReadAsArray(0,0,image_column,image_row) 
+    b3,b5,b6 = (band3.ReadAsArray(0,0,image_column,image_row), band5.ReadAsArray(0,0,image_column,image_row), band6.ReadAsArray(0,0,image_column,image_row)) 
     del dataset 
-    image = np.array(image_data,dtype=image_data.dtype)
+    image = np.array(np.stack([b3, b5, b6]),dtype=b3.dtype)
+    print(image.shape)
     image = np.swapaxes(image,0,1)
     image = np.swapaxes(image,1,2)
     image =image/255 
@@ -54,17 +56,16 @@ def predict():
     model = unet()
     model.load_weights(args.weights_path)
     head, tail = os.path.split(args.input)
-    getName = tail.split('-3bands-356.tif')
+    getName = tail.split('-8bands.tif')
     outPath = args.output_folder + "predicted_image/" 
     if not os.path.exists(outPath):
         os.makedirs(outPath)
     
+    # the image which has to be predicted
     geotrans, proj, image = load_image(args.input)
 
     desired_row_size = step_sz * math.ceil(image.shape[0]/ step_sz)
-    #print(desired_row_size)
     desired_col_size = step_sz * math.ceil(image.shape[1]/ step_sz)
-    #print(desired_col_size)
     desired_image = np.zeros((desired_row_size, desired_col_size, image.shape[2]),
                    dtype=image.dtype)
     desired_image[:image.shape[0], :image.shape[1],:] = image[:,:,:]
@@ -74,7 +75,7 @@ def predict():
 
     for i in range(0, image.shape[0]-(patch_sz-step_sz), step_sz):
         for j in range(0, image.shape[1]-(patch_sz-step_sz), step_sz):
-            # the image which has to be predicted
+         
             tile = desired_image[i:i + patch_sz, j:j + patch_sz,:]
             tile = np.expand_dims(tile, axis=0)
             pred = model.predict(tile)
