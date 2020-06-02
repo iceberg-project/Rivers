@@ -11,38 +11,37 @@ from keras.preprocessing.image import img_to_array
 from osgeo import gdal
 from os import listdir
 		
-def adjustTile(tile):
-    if(np.max(tile) > 1):
-        tile = tile / 255
-    return (tile)
+def adjustTile(img):
+    if(np.max(img) > 1):
+        img = img / 255
+    return (img)
 	
 #loading tiles
 def load_tile(path):
     ds = gdal.Open(path)
-	xsize = ds.RasterXSize    
-    ysize = ds.RasterYSize
     band3=ds.GetRasterBand(3)
     band5=ds.GetRasterBand(5)
     band6=ds.GetRasterBand(6)       
-    tile_proj = ds.GetProjection()
-    tile_geotrans = ds.GetGeoTransform()
-    b3,b5,b6 = (band3.ReadAsArray(0,0, xsize, ysize), band5.ReadAsArray(0,0, xsize, ysize), band6.ReadAsArray(0,0, xsize, ysize)) 
+    img_proj = ds.GetProjection()
+    img_geotrans = ds.GetGeoTransform()
+    b3,b5,b6 = (band3.ReadAsArray(0,0, ds.RasterXSize, ds.RasterYSize),
+                band5.ReadAsArray(0,0, ds.RasterXSize, ds.RasterYSize),
+                band6.ReadAsArray(0,0, ds.RasterXSize, ds.RasterYSize)) 
     del ds 
-    tile = np.array(np.stack([b3, b5, b6]), dtype=b3.dtype)
-    tile = np.swapaxes(tile,0,1)
-    tile = np.swapaxes(tile,1,2)
-    tile = adjustTile(tile) 
-    return tile_proj, tile_geotrans, tile
+    image = np.array(np.stack([b3, b5, b6]), dtype=b3.dtype)
+    image = np.swapaxes(image,0,1)
+    image = np.swapaxes(image,1,2)
+    image = adjustTile(image) 
+    return img_proj, img_geotrans, image
 	
 #writing predicted masks 
-def write_mask(filename,mask_proj,mask_geotrans,mask_data):    
+def write_mask(filename,img_proj,img_geotrans,img_data):    
     driver = gdal.GetDriverByName("GTiff")
-    bands, (ysize, xsize) = 1,mask_data.shape   
+    bands, (ysize, xsize) = 1,img_data.shape  
     ds = driver.Create(filename, xsize, ysize, bands, gdal.GDT_Float32)
-    ds.SetProjection(mask_proj)
-    ds.SetGeoTransform(mask_geotrans)                          
-    ds.GetRasterBand(1).WriteArray(mask_data)  
-    del ds
+    ds.SetProjection(img_proj)
+    ds.SetGeoTransform(img_geotrans)                          
+    ds.GetRasterBand(1).WriteArray(img_data)
     
 def args_parser():
     parser = argparse.ArgumentParser(description="predicts tiles")
@@ -76,7 +75,7 @@ if __name__ == '__main__':
         pred = model.predict(expand_tile)
         for i,item in enumerate(pred):
             mask = item[:,:,0]
-        write_mask(out_path+ "%s_predicted.tif"%head, proj, geotrans, mask)
+        write_mask(out_path+ "%s.tif"%head, proj, geotrans, mask)
 	
 	
 	
