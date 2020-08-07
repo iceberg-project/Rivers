@@ -17,7 +17,7 @@ import pandas as pd
 from radical.entk import Pipeline, Stage, Task, AppManager
 
 
-def generate_discover_pipeline(path):
+def generate_discover_pipeline(path, env_path):
     '''
     This function takes as an input a path on Bridges and returns a pipeline
     that will provide a file for all the images that exist in that path.
@@ -30,7 +30,7 @@ def generate_discover_pipeline(path):
     task = Task()
     task.name = 'Disc-T0'
     task.pre_exec = ['module load anaconda3/2019.03',
-                     'source activate keras-gpu']
+                     'source activate %' env_path]
     task.executable = 'python3'   # Assign executable to the task
     task.arguments = ['image_disc.py', '%s' % path, '--filename=images.csv',
                       '--filesize']
@@ -45,7 +45,7 @@ def generate_discover_pipeline(path):
     return pipeline
 
 
-def generate_pipeline(name, image, image_size):
+def generate_pipeline(name, image, image_size, env_path):
 
     '''
     This function creates a pipeline for an image that will be analyzed.
@@ -65,18 +65,14 @@ def generate_pipeline(name, image, image_size):
     # Create Task 1, training
     task0 = Task()
     task0.name = '%s-T0' % stage0.name
-    task0.pre_exec = ['module load matlab']
-    task0.executable = 'matlab'   # Assign executable to the task
+    task0.pre_exec = ['module load anaconda3/2019.03',
+                      'source activate %s' % env_path]
+    task0.executable = 'python'   # Assign executable to the task
     # Assign arguments for the task executable
-    task0.arguments = ["-nodisplay", "-nosplash", "-r",
-                       "multipagetiff('./','$NODE_LFS_PATH/%s');exit"
-                       % (task0.name)] 
-    task0.upload_input_data = [os.path.abspath('../utils/multipagetiff.m'),
-                               os.path.abspath('../utils/saveastiff.m')]
-    task0.link_input_data = [image]
+    task0.arguments = ['tile_unet.py', '--input', image, '--output', './'] 
+    task0.upload_input_data = [os.path.abspath('../tiling/tile_unet.py')]
     task0.cpu_reqs = {'processes': 1, 'threads_per_process': 1,
                       'process_type': None, 'thread_type': 'OpenMP'}
-    task0.lfs_per_process = int(image_size)
 
     stage0.add_tasks(task0)
     # Add Stage to the Pipeline
@@ -88,23 +84,21 @@ def generate_pipeline(name, image, image_size):
     task1 = Task()
     task1.name = '%s-T1' % stage1.name
     task1.pre_exec = ['module load anaconda3/2019.03',
-                      'source activate keras-gpu']
+                      'source activate %s' % env_path]
     task1.executable = 'python3'   # Assign executable to the task
     # Assign arguments for the task executable
-    task1.arguments = ['predict.py',
-                       '--input', '$NODE_LFS_PATH/%s/%s-multipage.tif' %
-                       (task0.name, image.split('/')[-1].split('.')[0]),
-                       '--output_folder', '$NODE_LFS_PATH/%s/' % task1.name,
-                       '--weights_path', 'weights/unet_weights.hdf5']
-    task1.link_input_data = ['$SHARED/unet_weights.hdf5 >' +
-                             'weights/unet_weights.hdf5']
-    task1.upload_input_data = [os.path.abspath('../classification/predict.py'),
+    task1.arguments = ['predict_unet.py',
+                       '--input', './' %
+                       '-o', './', '-w', model_path]
+    task1.link_input_data = ['$Pipeline_%s_Stage_%s_Task_%s/image_tiles >' % (entk_pipeline.name, stage0.name, task0.name) +
+                             'image_tiles']
+    task1.upload_input_data = [os.path.abspath('../classification/predict_unet.py'),
                                os.path.abspath('../classification/' +
                                                'gen_patches.py'),
                                os.path.abspath('../classification/' +
                                                'train_unet.py'),
                                os.path.abspath('../classification/' +
-                                               'unet_model.py')]
+                                               'model.py')]
     task1.cpu_reqs = {'processes': 1, 'threads_per_process': 1,
                       'process_type': None, 'thread_type': 'OpenMP'}
     task1.gpu_reqs = {'processes': 1, 'threads_per_process': 1,
@@ -120,18 +114,13 @@ def generate_pipeline(name, image, image_size):
     # Create Task 1, training
     task2 = Task()
     task2.name = '%s-T2' % stage2.name
-    task2.pre_exec = ['module load matlab']
-    task2.executable = 'matlab'   # Assign executable to the task
+    task2.pre_exec = ['module load anaconda3/2019.03']
+    task2.executable = 'python'   # Assign executable to the task
     # Assign arguments for the task executable
-    task2.arguments = ["-nodisplay", "-nosplash", "-r",
-                       "mosaic('%s', './', '$NODE_LFS_PATH/%s','./');exit"
-                       % (image.split('/')[-1], task1.name)]
-    task2.link_input_data = [image]
-    task2.upload_input_data = [os.path.abspath('../classification/mosaic.m'),
-                               os.path.abspath('../classification/' +
-                                               'natsortfiles.m'),
-                               os.path.abspath('../classification/' +
-                                               'natsort.m')]
+    task2.arguments = ["mosaic_unet.py", "-iw", image, '-i', './', '-o', './']
+    task2.link_input_data = ['$Pipeline_%s_Stage_%s_Task_%s/predicted_tiles >' % (entk_pipeline.name, stage1.name, task1.name) +
+                             'predicted_tiles']
+    task2.upload_input_data = [os.path.abspath('../mosaic/mosaic_unet.py')]
     task2.cpu_reqs = {'processes': 1, 'threads_per_process': 1,
                       'process_type': None, 'thread_type': 'OpenMP'}
     task2.tag = task1.name
