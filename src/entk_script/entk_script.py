@@ -90,7 +90,8 @@ def generate_pipeline(name, image, image_size, env_path):
     task1.arguments = ['predict_unet.py',
                        '--input', './' %
                        '-o', './', '-w', model_path]
-    task1.link_input_data = ['$Pipeline_%s_Stage_%s_Task_%s/image_tiles >' % (entk_pipeline.name, stage0.name, task0.name) +
+    task1.link_input_data = ['$Pipeline_%s_Stage_%s_Task_%s/image_tiles >' %
+                             (entk_pipeline.name, stage0.name, task0.name) +
                              'image_tiles']
     task1.upload_input_data = [os.path.abspath('../classification/predict_unet.py'),
                                os.path.abspath('../classification/' +
@@ -114,11 +115,13 @@ def generate_pipeline(name, image, image_size, env_path):
     # Create Task 1, training
     task2 = Task()
     task2.name = '%s-T2' % stage2.name
-    task2.pre_exec = ['module load anaconda3/2019.03']
+    task2.pre_exec = ['module load anaconda3/2019.03'
+                      'source activate %s' % env_path]
     task2.executable = 'python'   # Assign executable to the task
     # Assign arguments for the task executable
     task2.arguments = ["mosaic_unet.py", "-iw", image, '-i', './', '-o', './']
-    task2.link_input_data = ['$Pipeline_%s_Stage_%s_Task_%s/predicted_tiles >' % (entk_pipeline.name, stage1.name, task1.name) +
+    task2.link_input_data = ['$Pipeline_%s_Stage_%s_Task_%s/predicted_tiles >' % 
+                             (entk_pipeline.name, stage1.name, task1.name) +
                              'predicted_tiles']
     task2.upload_input_data = [os.path.abspath('../mosaic/mosaic_unet.py')]
     task2.cpu_reqs = {'processes': 1, 'threads_per_process': 1,
@@ -156,6 +159,12 @@ def args_parser():
     parser.add_argument('-w', '--walltime', type=int,
                         help='The amount of time resources are requested in' +
                         ' minutes')
+    parser.add_argument('--env', type=str, help='Path to conda environment ' +
+                        ' on Bridges')
+    parser.add_argument('--uname', type=str, help='RabiitMQ user name')
+    parser.add_argument('--pwd', type=str, help='RabbitMQ password')
+    parser.add_argument('--host', type=str, help='RabbitMQ hostname')
+    parser.add_argument('--port', type=int,'RabbitMQ port')
     parser.add_argument('--name', type=str,
                         help='name of the execution. It has to be a unique' +
                         ' value')
@@ -176,15 +185,16 @@ if __name__ == '__main__':
                 'queue': args.queue}
     try:
         # Create Application Manager
-        appman = AppManager(port=33235, hostname='two.radical-project.org',
+        appman = AppManager(port=args.port, hostname=args.host,
+                            username=args.uname,password=args.pwd,
                             name=args.name, autoterminate=False,
                             write_workflow=True)
 
         # Assign resource manager to the Application Manager
         appman.resource_desc = res_dict
-        appman.shared_data = [os.path.abspath('../../models/unet_weights.hdf5')]
+        appman.shared_data = [os.path.abspath('../../models/ctpn.01-0.07.hdf5')]
         # Create a task that discovers the dataset
-        disc_pipeline = generate_discover_pipeline(args.input_dir)
+        disc_pipeline = generate_discover_pipeline(args.input_dir, args.env)
         appman.workflow = set([disc_pipeline])
 
         # Run
@@ -199,7 +209,8 @@ if __name__ == '__main__':
         for idx in range(0, len(images)):
             p1 = generate_pipeline(name='P%03d' % idx,
                                    image=images['Filename'][idx],
-                                   image_size=images['Size'][idx])
+                                   image_size=images['Size'][idx],
+                                   env_path=args.env)
             pipelines.append(p1)
         # Assign the workflow as a set of Pipelines to the Application Manager
         appman.workflow = set(pipelines)
