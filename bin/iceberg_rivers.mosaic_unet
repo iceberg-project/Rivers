@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+"""
+Author: Ioannis Paraskevakos
+License: MIT
+Copyright: 2018-2019
+"""
+
+from iceberg_rivers.search.mosaic.mosaic_unet import mosaic_unet
+
+def args_parser():
+    parser = argparse.ArgumentParser(description="generates mosaic")
+    parser.add_argument('-iw', '--input_WV', type=str,
+                        help='Path and name of the WorldView image')
+    parser.add_argument('-i', '--input', type=str,
+                            help='Input predicted masks folder')
+    parser.add_argument('-t', '--tile_size', type=int, default=224,
+                        help='Tile size')
+    parser.add_argument('-s', '--step', type=int, default=112,
+                        help='Step size')						 
+    parser.add_argument('-o', '--output_folder', type=str, default='./',
+                        help='Folder where output mosaic will be stored')			
+    return parser.parse_args()
+    
+if __name__ == '__main__':
+    args = args_parser()
+
+    def mosaic_unet(args.input, args.output_folder, args.step,
+                    args.input_WV, args.tile_size):
