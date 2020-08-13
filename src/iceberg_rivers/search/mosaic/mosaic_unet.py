@@ -47,4 +47,4 @@ def mosaic_unet(input_path, output_path, step, input_WV, tile_size):
             mask[i:i + tile_size, j:j +     tile_size] = np.maximum(mask_tile[:, :], mask[i: i + tile_size, j:j + tile_size])
             k+=1
     write_mosaic(out_path + "%s_predicted.tif" % image_name, proj, geotrans,
-                 imask[0:image.shape[1], 0:image.shape[2]])   
+                 mask[0:image.shape[1], 0:image.shape[2]])   
