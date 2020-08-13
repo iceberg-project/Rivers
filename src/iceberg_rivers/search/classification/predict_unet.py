@@ -48,7 +48,8 @@ def predict_unet(input, weights_path, output_folder):
     tiles_path = input
     list = os.listdir(tiles_path) 
     num_tiles = len(list)
-	
+
+    print(tiles_path, num_tiles)	
     out_path = output_folder
     if not os.path.exists(out_path):
         os.makedirs(out_path)

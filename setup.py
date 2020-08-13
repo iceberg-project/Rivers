@@ -199,7 +199,7 @@ setup_args = {
                             'opencv-python',
                             'rasterio',
                             'affine',
-                            'pygdal==1.11.4.6',
+                            'gdal==2.2.1',
                             'scikit-image'
                            ],
 
