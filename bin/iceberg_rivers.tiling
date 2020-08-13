@@ -14,6 +14,8 @@ def args_parser():
     parser = argparse.ArgumentParser(description="divides a WorldView image into tiles")
     parser.add_argument('-i', '--input', type=str,
                         help='Path and name of the WorldView image')
+    parser.add_argument('-t', '--tile_size', type=int, default=224,
+                        help='Tile size')
     parser.add_argument('-s', '--step', type=int, default=112,
                         help='Step size')
     parser.add_argument('-o', '--output', type=str, 
@@ -22,4 +24,4 @@ def args_parser():
     
 if __name__ == '__main__':
     args = args_parser()
-    unet_tile(image_path=args.input, out_path=args.output, step=args.step)
+    tile_unet(image_path=args.input, output_path=args.output, step=args.step, tile_size=args.tile_size)

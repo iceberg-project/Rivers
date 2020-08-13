@@ -35,8 +35,8 @@ def mosaic_unet(input_path, output_path, step, input_WV, tile_size):
         os.makedirs(out_path)
     
     proj, geotrans, image = load_image(input_WV)
-    desired_row_size = step * (np.ceil(image.shape[1] / step) + 1)
-    desired_col_size = step * (np.ceil(image.shape[2] / step) + 1)
+    desired_row_size = np.int(step * (np.ceil(image.shape[1] / step) + 1))
+    desired_col_size = np.int(step * (np.ceil(image.shape[2] / step) + 1))
     mask = np.zeros((desired_row_size, desired_col_size), dtype=np.float64)
 
     k=0
