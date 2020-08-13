@@ -194,16 +194,19 @@ setup_args = {
                             'scipy',
                             'tifffile',
                             'keras >= 1.0',
+                            'tensorflow',
                             'tensorboardX==1.8',
                             'opencv-python',
                             'rasterio',
                             'affine',
+                            'pygdal==1.11.4.6',
+                            'scikit-image'
                            ],
 
     'zip_safe'          : False,
-    'scripts'           : ['bin/iceberg_rivers.tiling',
-                           'bin/iceberg_rivers.predicting',
-                           'bin/iceberg_rivers.mosaic'
+    'scripts'           : ['bin/iceberg_rivers.tile_unet',
+                           'bin/iceberg_rivers.predict',
+                           'bin/iceberg_rivers.mosaic_unet'
                            ]
 }
 

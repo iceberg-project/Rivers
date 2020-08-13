@@ -5,6 +5,7 @@ License: MIT
 Copyright: 2018-2019
 """
 
+import argparse
 from iceberg_rivers.search.mosaic.mosaic_unet import mosaic_unet
 
 def args_parser():
@@ -23,6 +24,5 @@ def args_parser():
     
 if __name__ == '__main__':
     args = args_parser()
-
-    def mosaic_unet(args.input, args.output_folder, args.step,
-                    args.input_WV, args.tile_size):
+    mosaic_unet(args.input, args.output_folder, args.step,
+                    args.input_WV, args.tile_size)

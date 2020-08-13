@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 """
 Author: Ioannis Paraskevakos
@@ -6,6 +5,7 @@ License: MIT
 Copyright: 2018-2019
 """
 
+import argparse
 from iceberg_rivers.search.classification.predict_unet import predict_unet
 
 def args_parser():
