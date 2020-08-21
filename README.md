@@ -48,7 +48,7 @@ $ cd $SCRATCH                      # switch to your working space.
 $ mkdir Rivers                      # create a directory to work in.
 $ cd Rivers                         # move into your working directory.
 $ module load keras/2.2.0_tf1.7_py3_gpu gdal/2.2.1  # load keras libraries and GDAL.
-$ virtualenv rivers_env             # create a virtual environment to isolate your work from the default system.
+$ virtualenv rivers_env --system-site-packages # create a virtual environment to isolate your work from the default system.
 $ source rivers_env/bin/activate    # activate your environment. Notice the command line prompt changes to show your environment on the next line.
 [rivers_env] $ pwd
 /pylon5/group/username/Rivers
@@ -61,7 +61,7 @@ $ source rivers_env/bin/activate    # activate your environment. Notice the comm
 ```bash
 $ git clone https://github.com/iceberg-project/Rivers.git
 $ module load keras/2.2.0_tf1.7_py3_gpu gdal/2.2.1
-$ virtualenv rivers_env
+$ virtualenv rivers_env --system-site-packages
 $ source rivers_env/bin/activate
 [rivers_env] $ export PYTHONPATH=<path>/rivers_env/lib/python3.6/site-packages:$PYTHONPATH
 [rivers_env] $ pip install . --upgrade
