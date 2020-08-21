@@ -42,7 +42,7 @@ $ pwd
 $ cd $SCRATCH                      # switch to your working space.
 $ mkdir Rivers                      # create a directory to work in.
 $ cd Rivers                         # move into your working directory.
-$ module load python3 cuda gdal/2.2.1  # load python3, CUDA libraries and GDAL.
+$ module load python3 cuda/10.0 gdal/2.2.1  # load python3, CUDA libraries and GDAL.
 $ virtualenv rivers_env             # create a virtual environment to isolate your work from the default system.
 $ source rivers_env/bin/activate    # activate your environment. Notice the command line prompt changes to show your environment on the next line.
 [rivers_env] $ pwd
@@ -55,8 +55,7 @@ $ source rivers_env/bin/activate    # activate your environment. Notice the comm
 
 ```bash
 $ git clone https://github.com/iceberg-project/Rivers.git
-$ module load cuda
-$ module load python3
+$ module load python3 cuda/10.0 gdal/2.2.1
 $ virtualenv rivers_env
 $ source rivers_env/bin/activate
 [rivers_env] $ export PYTHONPATH=<path>/rivers_env/lib/python3.5/site-packages
@@ -68,9 +67,10 @@ $ source rivers_env/bin/activate
 [iceberg_rivers] $ deactivate       # exit your virtual environment.
 $ interact -p GPU-small --gres=gpu:p100:1  # request a compute node.  This package has been tested on P100 GPUs on bridges, but that does not exclude any other resource that offers the same GPUs. (this may take a minute or two or more to receive an allocation).
 $ cd $SCRATCH/Rivers                # make sure you are in the same directory where everything was set up before.
-$ module load python3 cuda gdal/2.2.1  # load python3, CUDA libraries and GDAL, as before.
+$ module load python3 cuda/10.0 gdal/2.2.1  # load python3, CUDA libraries and GDAL, as before.
 $ source rivers_env/bin/activate    # activate your environment, no need to create a new environment because the Rivers tools are installed and isolated here.
-[iceberg_rivers] $ iceberg_rivers.tiling --help  # this will display a help screen of available usage and parameters.
+[rivers_env] $ export PYTHONPATH=<path>/rivers_env/lib/python3.5/site-packages
+[rivers_env] $ iceberg_rivers.tiling --help  # this will display a help screen of available usage and parameters.
 ```
 ## Prediction
 - Download a pre-trained model at: 
@@ -80,13 +80,13 @@ You can download to your local machine and use scp, ftp, rsync, or Globus to [tr
 Rivers predicting is executed in three steps: 
 First, follow the environment setup commands under 'To test' above. Then create tiles from an input GeoTiff image and write to the output_folder. The scale_bands parameter (in pixels) depends on the trained model being used.  The default scale_bands is 299 for the pre-trained model downloaded above.  If you use your own model the scale_bands may be different.
 ```bash
-[iceberg_rivers] $ iceberg_rivers.tiling --tile_size=224 --step=112 --input=<image_abspath> --output=./test/
+[rivers_env] $ iceberg_rivers.tiling --tile_size=224 --step=112 --input=<image_abspath> --output=./test/
 ```
 Then, detect rivers on each tile and output counts and confidence for each tile.
 ```bash
-[iceberg_rivers] $ iceberg_rivers.predict --input <tile_folder> -o <output_folder> -w <model>
+[rivers_env] $ iceberg_rivers.predict --input <tile_folder> -o <output_folder> -w <model>
 ```
 Finally, mosaic all the tiles back into one image
 ```bash
-[iceberg_rivers] $ iceberg_rivers.mosaic --input_WV image --input <masks_folder> --tile_size 224 --step 112 --output_folder ./mosaic
+[rivers_env] $ iceberg_rivers.mosaic --input_WV image --input <masks_folder> --tile_size 224 --step 112 --output_folder ./mosaic
 ```
