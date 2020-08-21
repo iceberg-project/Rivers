@@ -28,7 +28,7 @@ def write_mosaic(filename,img_proj,img_geotrans,img_data):
 
 def mosaic_unet(input_path, output_path, step, input_WV, tile_size):
     masks_path = input_path
-    list = sorted(os.listdir(masks_path),key=lambda x: int(os.path.splitext(x)[0]))
+    pred_list = sorted(os.listdir(masks_path),key=lambda x: int(os.path.splitext(x)[0]))
     image_name = input_WV.split('/')[-1].split('.')[0]
     out_path = output_path 
     if not os.path.exists(out_path):
@@ -42,7 +42,7 @@ def mosaic_unet(input_path, output_path, step, input_WV, tile_size):
     k=0
     for j in range(0, mask.shape[1]-(tile_size-step), step):
         for i in range(0, mask.shape[0] - (tile_size - step), step):
-            mask_name = list[k]
+            mask_name = pred_list[k]
             mask_proj, mask_geotranse, mask_tile= load_image(masks_path + mask_name) 			
             mask[i:i + tile_size, j:j +     tile_size] = np.maximum(mask_tile[:, :], mask[i: i + tile_size, j:j + tile_size])
             k+=1

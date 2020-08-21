@@ -18,11 +18,13 @@ def args_parser():
                         help='Tile size')
     parser.add_argument('-s', '--step', type=int, default=112,
                         help='Step size')						 
-    parser.add_argument('-o', '--output_folder', type=str, default='./',
+    parser.add_argument('-o', '--output_folder', type=str, default='.',
                         help='Folder where output mosaic will be stored')			
     return parser.parse_args()
     
 if __name__ == '__main__':
     args = args_parser()
-    mosaic_unet(args.input, args.output_folder, args.step,
+    input_folder = args.input + '/'
+    output_folder = args.output_folder + '/'
+    mosaic_unet(input_folder, output_folder, args.step,
                     args.input_WV, args.tile_size)

@@ -20,4 +20,6 @@ def args_parser():
     
 if __name__ == '__main__':
     args = args_parser()
-    predict_unet(args.input, args.weights_path, args.output_folder)
+    input_folder = args.input + '/'
+    output_folder = args.output_folder + '/'
+    predict_unet(input_folder, args.weights_path, output_folder)

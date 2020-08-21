@@ -63,4 +63,4 @@ def predict_unet(input, weights_path, output_folder):
         pred = model.predict(expand_tile)
         for i,item in enumerate(pred):
             mask = item[:,:,0]
-        write_mask(out_path+ "%s.tif"%head, proj, geotrans, mask)
+        write_mask(out_path + "%s.tif" % head, proj, geotrans, mask)

@@ -24,4 +24,5 @@ def args_parser():
     
 if __name__ == '__main__':
     args = args_parser()
-    tile_unet(image_path=args.input, output_path=args.output, step=args.step, tile_size=args.tile_size)
+    output_path = args.output + '/'
+    tile_unet(image_path=args.input, output_path=output_path, step=args.step, tile_size=args.tile_size)
