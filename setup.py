@@ -168,7 +168,7 @@ setup_args = {
     'long_description_content_type' : "text/markdown",
     'author'             : 'ICEBERG Team',
     'author_email'       : 'iceberg-ci@googlegroups.com',
-    'url'                : 'https://www.github.com/iceberg-project/seals/',
+    'url'                : 'https://www.github.com/iceberg-project/rivers/',
     'license'            : 'MIT',
     'classifiers'        : [
         'Development Status :: 1 - Planning',
