@@ -11,13 +11,13 @@ We provide a classification algorithm for ice surface features from high-resolut
 - numpy
 - scipy
 - tifffile
-- keras >= 1.0
-- tensorboardX==1.8
+- keras==2.2.4
+- tensorboard==1.13.1
 - opencv-python
 - rasterio
 - affine
-- pygdal == 1.11.4.6
-- tensorflow
+- pygdal==2.2.1
+- tensorflow==1.13.1
 
 ## Installation
 Preliminaries:  
@@ -36,18 +36,23 @@ Once you have logged into bridges, you can follow one of two methods for install
 
 The lines below following a '$' are commands to enter (or cut and paste) into your terminal (note that all commands are case-sensitive, meaning capital and lowercase letters are differentiated.)  Everything following '#' are comments to explain the reason for the command and should not be included in what you enter.  Lines that do not start with '$' or '[rivers_env] $' are output you should expect to see.
 
+[paraskev@login006 RiversRepo]$
+[paraskev@login006 RiversRepo]$ source $SCRATCH/rivers_test2/bin/activate
+[paraskev@login006 RiversRepo]$ export PYTHONPATH=/pylon5/mc3bggp/paraskev/rivers_test2/lib/python3.6/site-packages/:$PYTHONPATH
+
+
 ```bash
 $ pwd
 /home/username
 $ cd $SCRATCH                      # switch to your working space.
 $ mkdir Rivers                      # create a directory to work in.
 $ cd Rivers                         # move into your working directory.
-$ module load python3 cuda/10.0 gdal/2.2.1  # load python3, CUDA libraries and GDAL.
+$ module load keras/2.2.0_tf1.7_py3_gpu gdal/2.2.1  # load keras libraries and GDAL.
 $ virtualenv rivers_env             # create a virtual environment to isolate your work from the default system.
 $ source rivers_env/bin/activate    # activate your environment. Notice the command line prompt changes to show your environment on the next line.
 [rivers_env] $ pwd
 /pylon5/group/username/Rivers
-[rivers_env] $ export PYTHONPATH=<path>/rivers_env/lib/python3.5/site-packages # set a system variable to point python to your specific code. (Replace <path> with the results of pwd command above.
+[rivers_env] $ export PYTHONPATH=<path>/rivers_env/lib/python3.6/site-packages:$PYTHONPATH # set a system variable to point python to your specific code. (Replace <path> with the results of pwd command above.
 [rivers_env] $ pip install iceberg_rivers.search # pip is a python tool to extract the requested software (iceberg_rivers.search in this case) from a repository. (this may take several minutes).
 ```
 
@@ -55,10 +60,10 @@ $ source rivers_env/bin/activate    # activate your environment. Notice the comm
 
 ```bash
 $ git clone https://github.com/iceberg-project/Rivers.git
-$ module load python3 cuda/10.0 gdal/2.2.1
+$ module load keras/2.2.0_tf1.7_py3_gpu gdal/2.2.1
 $ virtualenv rivers_env
 $ source rivers_env/bin/activate
-[rivers_env] $ export PYTHONPATH=<path>/rivers_env/lib/python3.5/site-packages
+[rivers_env] $ export PYTHONPATH=<path>/rivers_env/lib/python3.6/site-packages:$PYTHONPATH
 [rivers_env] $ pip install . --upgrade
 ```
 
@@ -67,9 +72,9 @@ $ source rivers_env/bin/activate
 [iceberg_rivers] $ deactivate       # exit your virtual environment.
 $ interact -p GPU-small --gres=gpu:p100:1  # request a compute node.  This package has been tested on P100 GPUs on bridges, but that does not exclude any other resource that offers the same GPUs. (this may take a minute or two or more to receive an allocation).
 $ cd $SCRATCH/Rivers                # make sure you are in the same directory where everything was set up before.
-$ module load python3 cuda/10.0 gdal/2.2.1  # load python3, CUDA libraries and GDAL, as before.
+$ module load keras/2.2.0_tf1.7_py3_gpu gdal/2.2.1  # load keras libraries and GDAL, as before.
 $ source rivers_env/bin/activate    # activate your environment, no need to create a new environment because the Rivers tools are installed and isolated here.
-[rivers_env] $ export PYTHONPATH=<path>/rivers_env/lib/python3.5/site-packages
+[rivers_env] $ export PYTHONPATH=<path>/rivers_env/lib/python3.6/site-packages:$PYTHONPATH
 [rivers_env] $ iceberg_rivers.tiling --help  # this will display a help screen of available usage and parameters.
 ```
 ## Prediction
