@@ -35,10 +35,6 @@ Once you have logged into bridges, you can follow one of two methods for install
 
 The lines below following a '$' are commands to enter (or cut and paste) into your terminal (note that all commands are case-sensitive, meaning capital and lowercase letters are differentiated.)  Everything following '#' are comments to explain the reason for the command and should not be included in what you enter.  Lines that do not start with '$' or '[rivers_env] $' are output you should expect to see.
 
-[paraskev@login006 RiversRepo]$
-[paraskev@login006 RiversRepo]$ source $SCRATCH/rivers_test2/bin/activate
-[paraskev@login006 RiversRepo]$ export PYTHONPATH=/pylon5/mc3bggp/paraskev/rivers_test2/lib/python3.6/site-packages/:$PYTHONPATH
-
 
 ```bash
 $ pwd
