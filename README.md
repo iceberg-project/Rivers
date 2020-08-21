@@ -12,12 +12,11 @@ We provide a classification algorithm for ice surface features from high-resolut
 - scipy
 - tifffile
 - keras==2.2.4
-- tensorboard==1.13.1
 - opencv-python
 - rasterio
 - affine
 - pygdal==2.2.1
-- tensorflow==1.13.1
+- tensorflow-gpu==1.7.1
 
 ## Installation
 Preliminaries:  
