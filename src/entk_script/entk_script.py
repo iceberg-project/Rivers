@@ -9,7 +9,6 @@ License: MIT
 Copyright: 2018-2019
 """
 
-from __future__ import print_function
 import argparse
 import os
 import pandas as pd
@@ -29,9 +28,10 @@ def generate_discover_pipeline(path, env_path):
     # Create Task 1, training
     task = Task()
     task.name = 'Disc-T0'
-    task.pre_exec = ['module load anaconda3/2019.03',
-                     'source activate %' env_path]
-    task.executable = 'python3'   # Assign executable to the task
+    task.pre_exec = ['module load python3 cuda/9.0 gdal/2.2.1',
+                     'source %s/bin/activate' % env_path,
+                     'export PYTHONPATH=%s/lib/python3.5/site-packages' % env_path]
+    task.executable = 'python'   # Assign executable to the task
     task.arguments = ['image_disc.py', '%s' % path, '--filename=images.csv',
                       '--filesize']
     task.download_output_data = ['images.csv']
@@ -45,7 +45,7 @@ def generate_discover_pipeline(path, env_path):
     return pipeline
 
 
-def generate_pipeline(name, image, image_size, env_path):
+def generate_pipeline(name, image, image_size, env_path, model_path):
 
     '''
     This function creates a pipeline for an image that will be analyzed.
@@ -65,12 +65,12 @@ def generate_pipeline(name, image, image_size, env_path):
     # Create Task 1, training
     task0 = Task()
     task0.name = '%s-T0' % stage0.name
-    task0.pre_exec = ['module load anaconda3/2019.03',
-                      'source activate %s' % env_path]
-    task0.executable = 'python'   # Assign executable to the task
+    task0.pre_exec = ['module load python3 cuda/9.0 gdal/2.2.1',
+                     'source %s/bin/activate' % env_path,
+                     'export PYTHONPATH=%s/lib/python3.5/site-packages' % env_path]
+    task0.executable = 'iceberg_rivers.tiling'   # Assign executable to the task
     # Assign arguments for the task executable
-    task0.arguments = ['tile_unet.py', '--input', image, '--output', './'] 
-    task0.upload_input_data = [os.path.abspath('../tiling/tile_unet.py')]
+    task0.arguments = ['--input', image, '--output', './tiles/'] 
     task0.cpu_reqs = {'processes': 1, 'threads_per_process': 1,
                       'process_type': None, 'thread_type': 'OpenMP'}
 
@@ -83,28 +83,20 @@ def generate_pipeline(name, image, image_size, env_path):
     # Create Task 1, training
     task1 = Task()
     task1.name = '%s-T1' % stage1.name
-    task1.pre_exec = ['module load anaconda3/2019.03',
-                      'source activate %s' % env_path]
-    task1.executable = 'python3'   # Assign executable to the task
+    task1.pre_exec = ['module load python3 cuda/9.0 gdal/2.2.1',
+                     'source %s/bin/activate' % env_path,
+                     'export PYTHONPATH=%s/lib/python3.5/site-packages' % env_path]
+    task1.executable = 'iceberg_rivers.predict'   # Assign executable to the task
     # Assign arguments for the task executable
-    task1.arguments = ['predict_unet.py',
-                       '--input', './' %
-                       '-o', './', '-w', model_path]
-    task1.link_input_data = ['$Pipeline_%s_Stage_%s_Task_%s/image_tiles >' %
+    task1.arguments = ['--input', './tiles', '-o', './predicted/', '-w', model_path]
+    task1.link_input_data = ['$Pipeline_%s_Stage_%s_Task_%s/tiles >' %
                              (entk_pipeline.name, stage0.name, task0.name) +
-                             'image_tiles']
-    task1.upload_input_data = [os.path.abspath('../classification/predict_unet.py'),
-                               os.path.abspath('../classification/' +
-                                               'gen_patches.py'),
-                               os.path.abspath('../classification/' +
-                                               'train_unet.py'),
-                               os.path.abspath('../classification/' +
-                                               'model.py')]
+                             'tiles']
     task1.cpu_reqs = {'processes': 1, 'threads_per_process': 1,
                       'process_type': None, 'thread_type': 'OpenMP'}
     task1.gpu_reqs = {'processes': 1, 'threads_per_process': 1,
                       'process_type': None, 'thread_type': 'OpenMP'}
-    task1.tag = task0.name
+#    task1.tag = task0.name
 
     stage1.add_tasks(task1)
     # Add Stage to the Pipeline
@@ -115,18 +107,18 @@ def generate_pipeline(name, image, image_size, env_path):
     # Create Task 1, training
     task2 = Task()
     task2.name = '%s-T2' % stage2.name
-    task2.pre_exec = ['module load anaconda3/2019.03'
-                      'source activate %s' % env_path]
-    task2.executable = 'python'   # Assign executable to the task
+    task2.pre_exec = ['module load python3 cuda/9.0 gdal/2.2.1',
+                     'source %s/bin/activate' % env_path,
+                     'export PYTHONPATH=%s/lib/python3.5/site-packages' % env_path]
+    task2.executable = 'iceberg_rivers.mosaic'   # Assign executable to the task
     # Assign arguments for the task executable
-    task2.arguments = ["mosaic_unet.py", "-iw", image, '-i', './', '-o', './']
-    task2.link_input_data = ['$Pipeline_%s_Stage_%s_Task_%s/predicted_tiles >' % 
+    task2.arguments = ["-iw", image, '-i', './predicted', '-o', './']
+    task2.link_input_data = ['$Pipeline_%s_Stage_%s_Task_%s/predicted >' % 
                              (entk_pipeline.name, stage1.name, task1.name) +
-                             'predicted_tiles']
-    task2.upload_input_data = [os.path.abspath('../mosaic/mosaic_unet.py')]
+                             'predicted']
     task2.cpu_reqs = {'processes': 1, 'threads_per_process': 1,
                       'process_type': None, 'thread_type': 'OpenMP'}
-    task2.tag = task1.name
+#    task2.tag = task1.name
 
     stage2.add_tasks(task2)
     # Add Stage to the Pipeline
@@ -164,7 +156,7 @@ def args_parser():
     parser.add_argument('--uname', type=str, help='RabiitMQ user name')
     parser.add_argument('--pwd', type=str, help='RabbitMQ password')
     parser.add_argument('--host', type=str, help='RabbitMQ hostname')
-    parser.add_argument('--port', type=int,'RabbitMQ port')
+    parser.add_argument('--port', type=int, help='RabbitMQ port')
     parser.add_argument('--name', type=str,
                         help='name of the execution. It has to be a unique' +
                         ' value')
@@ -192,7 +184,6 @@ if __name__ == '__main__':
 
         # Assign resource manager to the Application Manager
         appman.resource_desc = res_dict
-        appman.shared_data = [os.path.abspath('../../models/ctpn.01-0.07.hdf5')]
         # Create a task that discovers the dataset
         disc_pipeline = generate_discover_pipeline(args.input_dir, args.env)
         appman.workflow = set([disc_pipeline])
@@ -210,7 +201,8 @@ if __name__ == '__main__':
             p1 = generate_pipeline(name='P%03d' % idx,
                                    image=images['Filename'][idx],
                                    image_size=images['Size'][idx],
-                                   env_path=args.env)
+                                   env_path=args.env,
+                                   model_path=args.model)
             pipelines.append(p1)
         # Assign the workflow as a set of Pipelines to the Application Manager
         appman.workflow = set(pipelines)
