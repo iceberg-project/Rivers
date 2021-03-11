@@ -28,8 +28,8 @@ Login to bridges via ssh using a Unix or Mac command line terminal.  Login is av
 For Windows Users:  
 Many tools are available for ssh access to bridges.  Please see [Ubuntu](https://ubuntu.com/tutorials/tutorial-ubuntu-on-windows#1-overview), [MobaXterm](https://mobaxterm.mobatek.net) or [PuTTY](https://www.chiark.greenend.org.uk/~sgtatham/putty/)
 
-### PSC Bridges
-Once you have logged into bridges, you can follow one of two methods for installing iceberg-rivers.
+### PSC Bridges 2
+Once you have logged into Bridges 2, you can follow one of two methods for installing iceberg-rivers.
 
 #### Method 1 (Recommended):  
 
@@ -39,14 +39,14 @@ The lines below following a '$' are commands to enter (or cut and paste) into yo
 ```bash
 $ pwd
 /home/username
-$ cd $SCRATCH                      # switch to your working space.
+$ cd $PROJECT                      # switch to your working space.
 $ mkdir Rivers                      # create a directory to work in.
 $ cd Rivers                         # move into your working directory.
-$ module load keras/2.2.0_tf1.7_py3_gpu gdal/2.2.1  # load keras libraries and GDAL.
+$ module load cuda/9.2.0
 $ virtualenv rivers_env --system-site-packages # create a virtual environment to isolate your work from the default system.
 $ source rivers_env/bin/activate    # activate your environment. Notice the command line prompt changes to show your environment on the next line.
 [rivers_env] $ pwd
-/pylon5/group/username/Rivers
+/ocean/projects/group/username/Rivers
 [rivers_env] $ export PYTHONPATH=<path>/rivers_env/lib/python3.6/site-packages:$PYTHONPATH # set a system variable to point python to your specific code. (Replace <path> with the results of pwd command above.
 [rivers_env] $ pip install iceberg_rivers.search # pip is a python tool to extract the requested software (iceberg_rivers.search in this case) from a repository. (this may take several minutes).
 ```
@@ -55,7 +55,7 @@ $ source rivers_env/bin/activate    # activate your environment. Notice the comm
 
 ```bash
 $ git clone https://github.com/iceberg-project/Rivers.git
-$ module load keras/2.2.0_tf1.7_py3_gpu gdal/2.2.1
+$ module load cuda/9.2.0
 $ virtualenv rivers_env --system-site-packages
 $ source rivers_env/bin/activate
 [rivers_env] $ export PYTHONPATH=<path>/rivers_env/lib/python3.6/site-packages:$PYTHONPATH
@@ -66,7 +66,7 @@ $ source rivers_env/bin/activate
 ```bash
 [iceberg_rivers] $ deactivate       # exit your virtual environment.
 $ interact -p GPU-small --gres=gpu:p100:1  # request a compute node.  This package has been tested on P100 GPUs on bridges, but that does not exclude any other resource that offers the same GPUs. (this may take a minute or two or more to receive an allocation).
-$ cd $SCRATCH/Rivers                # make sure you are in the same directory where everything was set up before.
+$ cd $PROJECT/Rivers                # make sure you are in the same directory where everything was set up before.
 $ module load keras/2.2.0_tf1.7_py3_gpu gdal/2.2.1  # load keras libraries and GDAL, as before.
 $ source rivers_env/bin/activate    # activate your environment, no need to create a new environment because the Rivers tools are installed and isolated here.
 [rivers_env] $ export PYTHONPATH=<path>/rivers_env/lib/python3.6/site-packages:$PYTHONPATH
