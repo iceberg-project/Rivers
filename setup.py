@@ -193,14 +193,16 @@ setup_args = {
     'install_requires'  :  ['numpy',
                             'scipy',
                             'tifffile',
+                            'h5py==2.10.0',
                             'keras==2.2.0',
                             'tensorflow-gpu==1.7.1',
 #                            'tensorboard==1.7.1',
                             'opencv-python',
                             'rasterio',
                             'affine',
-                            'gdal==2.2.1',
-                            'scikit-image'
+                            'gdal==3.0.4',
+                            'scikit-image',
+                            'scikit-learn'
                            ],
 
     'zip_safe'          : False,
