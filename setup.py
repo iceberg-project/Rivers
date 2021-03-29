@@ -176,7 +176,7 @@ setup_args = {
         'Environment :: Console',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Topic :: Utilities',
         'Topic :: Scientific/Engineering',
         'Operating System :: MacOS :: MacOS X',
