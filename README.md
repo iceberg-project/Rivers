@@ -51,7 +51,7 @@ $ source activate iceberg_rivers/
 [iceberg_rivers] $ pwd
 /ocean/projects/group/username/Rivers
 [iceberg_rivers]$ export PYTHONPATH=/ocean/projects/group/username/iceberg_rivers/lib/python3.7/site-packages/
-[iceberg_rivers]$ pip install iceberg_rivers
+[iceberg_rivers]$ pip install iceberg_rivers.search
 ```
 
 #### Method 2 (Installing from source; recommended for developers only): 
