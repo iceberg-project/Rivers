@@ -26,6 +26,7 @@ env:
 install:
 #  - pip install .
 #  - pip install coverage
+  - pip install keras
   - pip install flake8
   - pip install pylint
 #  - pip install codecov
